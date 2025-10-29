@@ -9,6 +9,17 @@ class DioServiceImpl implements IDioService {
 
   Dio get client => _dio;
 
+  // Hide the api key in the log when in production
+  void _safeLog(String message, String apiKey) {
+    final maskedKey = apiKey.replaceRange(
+      apiKey.length > 8 ? apiKey.length - 8 : 0,
+      apiKey.length,
+      '********',
+    );
+    final safeMessage = message.replaceAll(apiKey, maskedKey);
+    print(safeMessage);
+  }
+
   DioServiceImpl(ApiEnvironment environment, String apiKey)
     : _dio = Dio(
         BaseOptions(
@@ -19,7 +30,15 @@ class DioServiceImpl implements IDioService {
         ),
       ) {
     _dio.interceptors.addAll([
-      LogInterceptor(requestBody: true, responseBody: true, error: true),
+      // LogInterceptor(requestBody: true, responseBody: true, error: true),
+      LogInterceptor(
+        requestBody: true,
+        responseBody: true,
+        requestHeader: false,
+        responseHeader: false,
+        logPrint: (obj) => _safeLog(obj.toString(), apiKey),
+      ),
+
       InterceptorsWrapper(
         onRequest: (options, handler) {
           options.headers['X-App-Version'] = '1.0.0';
