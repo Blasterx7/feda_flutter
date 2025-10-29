@@ -56,10 +56,10 @@ void main(List<String> args) {
       if (exportsMap.containsKey(exportName)) {
         var i = 1;
         var base = exportName.replaceAll('.dart', '');
-        while (exportsMap.containsKey('$base\_$i.dart')) {
+        while (exportsMap.containsKey('${base}_$i.dart')) {
           i++;
         }
-        exportName = '$base\_$i.dart';
+        exportName = '${base}_$i.dart';
       }
     }
 

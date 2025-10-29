@@ -1,13 +1,12 @@
-import 'package:feda_flutter/src/core/env/api_environment.dart';
+import 'package:feda_flutter/src/exports/index.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:feda_flutter/feda_flutter.dart';
 
 void main() {
   // initialize FedaFlutter instance
   final feda = FedaFlutter(
-    apiKey: 'test_api_key',
+    DioServiceImpl(ApiEnvironment.sandbox, 'test_api_key'),
     environment: ApiEnvironment.sandbox,
+    apiKey: 'test_api_key',
   );
 
   test('FedaFlutter instance should be created', () {

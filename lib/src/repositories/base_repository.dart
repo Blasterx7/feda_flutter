@@ -13,11 +13,22 @@ abstract class BaseRepository {
         : NetworkException("Unexpected repository error");
   }
 
-  Future<ApiResponse<dynamic>> safeCall(
-    Future<ApiResponse<dynamic>> Function() action,
-  ) async {
+  /// Safe call wrapper for repository actions.
+  ///
+  /// Accepts an action that may return either a raw value `T` or an
+  /// `ApiResponse<T>`. If the action returns a raw `T`, it will be wrapped
+  /// into an `ApiResponse<T>` with a null `statusCode`. If the action
+  /// already returns `ApiResponse<T>`, it will be returned as-is.
+  Future<ApiResponse<T>> safeCall<T>(Future<dynamic> Function() action) async {
     try {
-      return await action();
+      final result = await action();
+
+      if (result is ApiResponse<T>) {
+        return result;
+      }
+
+      // Wrap raw result into ApiResponse<T>
+      return ApiResponse<T>(data: result as T?, statusCode: null);
     } catch (e) {
       throw _handleError(e);
     }

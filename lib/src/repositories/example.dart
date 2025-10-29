@@ -13,7 +13,7 @@ class UserRepository extends BaseRepository {
 
   Future<ApiResponse<dynamic>> createUser(Map<String, dynamic> data) =>
       safeCall(() => client.post("/users", data: data));
-
+  
   Future<ApiResponse<dynamic>> updateUser(int id, Map<String, dynamic> data) =>
       safeCall(() => client.put("/users/$id", data: data));
 
