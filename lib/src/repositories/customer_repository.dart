@@ -12,7 +12,6 @@ class CustomersRepository extends BaseRepository {
   Future<ApiResponse<List<Customer>>> getCustomers() async {
     return safeCall(() async {
       final res = await client.get(CUSTOMERS_BASE_PATH);
-      // Transforme la liste JSON en List<Customer>
       final data = (res.data as List)
           .map((json) => Customer.fromJson(json))
           .toList();

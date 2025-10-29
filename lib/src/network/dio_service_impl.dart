@@ -22,7 +22,6 @@ class DioServiceImpl implements IDioService {
       LogInterceptor(requestBody: true, responseBody: true, error: true),
       InterceptorsWrapper(
         onRequest: (options, handler) {
-          // Exemple : ajouter un header custom pour toutes les requêtes
           options.headers['X-App-Version'] = '1.0.0';
           return handler.next(options);
         },

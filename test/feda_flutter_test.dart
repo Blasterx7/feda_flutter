@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   // initialize FedaFlutter instance
   final feda = FedaFlutter(
-    DioServiceImpl(ApiEnvironment.sandbox, 'test_api_key'),
     environment: ApiEnvironment.sandbox,
     apiKey: 'test_api_key',
   );

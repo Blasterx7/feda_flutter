@@ -132,7 +132,7 @@ packages:
   feda_flutter:
     dependency: "direct main"
     description:
-      path: "../feda_flutter"
+      path: ".."
       relative: true
     source: path
     version: "0.0.1"

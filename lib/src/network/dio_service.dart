@@ -1,7 +1,6 @@
 import 'package:feda_flutter/src/core/models/api_response.dart';
 
 abstract class IDioService {
-  // Use ApiResponse<dynamic> as the default to keep implementations flexible.
   Future<ApiResponse<dynamic>> get(
     String endpoint, {
     Map<String, dynamic>? query,
