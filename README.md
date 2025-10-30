@@ -46,3 +46,6 @@ feature/*   → Chaque nouvelle fonctionnalité
 fix/*       → Bugs et patchs
 release/*   → Préparation d’une nouvelle version stable
 docs/*      → Documentation
+
+## Commit writting
+

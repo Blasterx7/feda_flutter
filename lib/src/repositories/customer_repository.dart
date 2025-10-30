@@ -12,9 +12,9 @@ class CustomersRepository extends BaseRepository {
   Future<ApiResponse<List<Customer>>> getCustomers() async {
     return safeCall(() async {
       final res = await client.get(CUSTOMERS_BASE_PATH);
-      final data = (res.data as List)
-          .map((json) => Customer.fromJson(json))
-          .toList();
+      // Let CustomerCollection handle wrapped shapes like {"v1/customers": [...], "meta": {...}}
+      final collection = CustomerCollection.fromApi(res.data);
+      final data = collection.customers;
 
       return ApiResponse<List<Customer>>(
         data: data,
@@ -27,7 +27,8 @@ class CustomersRepository extends BaseRepository {
   Future<ApiResponse<Customer>> getCustomer(int id) async {
     return safeCall(() async {
       final res = await client.get("$CUSTOMERS_BASE_PATH/$id");
-      final customer = Customer.fromJson(res.data);
+      final raw = normalizeApiData(res.data);
+      final customer = Customer.fromJson(raw);
       return ApiResponse<Customer>(data: customer, statusCode: res.statusCode);
     });
   }
@@ -43,7 +44,8 @@ class CustomersRepository extends BaseRepository {
           ? data.toJson()
           : data as Map<String, dynamic>;
       final res = await client.post(CUSTOMERS_BASE_PATH, data: payload);
-      final customer = Customer.fromJson(res.data);
+      final raw = normalizeApiData(res.data);
+      final customer = Customer.fromJson(raw);
       return ApiResponse<Customer>(data: customer, statusCode: res.statusCode);
     });
   }
@@ -59,7 +61,8 @@ class CustomersRepository extends BaseRepository {
           ? data.toJson()
           : data as Map<String, dynamic>;
       final res = await client.put('$CUSTOMERS_BASE_PATH/$id', data: payload);
-      final customer = Customer.fromJson(res.data);
+      final raw = normalizeApiData(res.data);
+      final customer = Customer.fromJson(raw);
       return ApiResponse<Customer>(data: customer, statusCode: res.statusCode);
     });
   }

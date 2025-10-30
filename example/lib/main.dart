@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:feda_flutter/feda_flutter.dart';
 import 'package:flutter/material.dart';
 
@@ -13,6 +15,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
@@ -31,10 +34,9 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
 
   final FedaFlutter _fedaFlutter = FedaFlutter(
-    apiKey: 'api_key',
+    apiKey: 'sk_sandbox_oRoKr1GM3bUyrI4x9m56UoUl',
     environment: ApiEnvironment.sandbox,
   );
 
@@ -43,19 +45,191 @@ class _MyHomePageState extends State<MyHomePage> {
     // TODO: implement initState
     super.initState();
     _fedaFlutter.initialize();
-    _fedaFlutter.customers.getCustomers();
+    
   }
 
-  void _incrementCounter() {
+  final List<String> _logs = [];
+  final TextEditingController _customerIdController = TextEditingController();
+  final TextEditingController _transactionIdController =
+      TextEditingController();
+  // Fields for creating a customer
+  final TextEditingController _custFirstNameController =
+      TextEditingController();
+  final TextEditingController _custLastNameController = TextEditingController();
+  final TextEditingController _custEmailController = TextEditingController();
+  final TextEditingController _custPhoneNumberController =
+      TextEditingController();
+  final TextEditingController _custPhoneCountryController =
+      TextEditingController(text: 'SN');
+  bool _loading = false;
+
+  void _setLoading(bool v) {
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      _loading = v;
     });
   }
+
+  void _appendLog(String entry) {
+    setState(() {
+      _logs.insert(0, '${DateTime.now().toIso8601String()} - $entry');
+      if (_logs.length > 200) _logs.removeLast();
+    });
+  }
+
+  String _serialize(dynamic o) {
+    try {
+      if (o == null) return 'null';
+      if (o is Iterable) {
+        final list = o.map((e) {
+          try {
+            return (e as dynamic).toJson();
+          } catch (_) {
+            return e;
+          }
+        }).toList();
+        return const JsonEncoder.withIndent('  ').convert(list);
+      }
+
+      try {
+        final m = (o as dynamic).toJson();
+        return const JsonEncoder.withIndent('  ').convert(m);
+      } catch (_) {
+        return const JsonEncoder.withIndent('  ').convert(o);
+      }
+    } catch (e) {
+      return o.toString();
+    }
+  }
+
+  Future<void> _callGetCustomers() async {
+    _appendLog('Calling getCustomers()');
+    _setLoading(true);
+    try {
+      final res = await _fedaFlutter.customers.getCustomers();
+      _appendLog('status: ${res.statusCode}');
+      _appendLog(_serialize(res.data));
+    } catch (e) {
+      _appendLog('Error: $e');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> _callGetCustomer(int id) async {
+    _appendLog('Calling getCustomer($id)');
+    _setLoading(true);
+    try {
+      final res = await _fedaFlutter.customers.getCustomer(id);
+      _appendLog('status: ${res.statusCode}');
+      _appendLog(_serialize(res.data));
+    } catch (e) {
+      _appendLog('Error: $e');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> _callGetTransactions() async {
+    _appendLog('Calling getTransactions()');
+    _setLoading(true);
+    try {
+      final res = await _fedaFlutter.transactions.getTransactions();
+      _appendLog('status: ${res.statusCode}');
+      _appendLog(_serialize(res.data));
+      // If the repository returned pagination/meta info include it in the logs
+      if (res.meta != null) {
+        _appendLog('meta: ${_serialize(res.meta)}');
+      }
+    } catch (e) {
+      _appendLog('Error: $e');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> _callGetTransaction(int id) async {
+    _appendLog('Calling getTransaction($id)');
+    _setLoading(true);
+    try {
+      final res = await _fedaFlutter.transactions.getTransaction(id);
+      _appendLog('status: ${res.statusCode}');
+      _appendLog(_serialize(res.data));
+    } catch (e) {
+      _appendLog('Error: $e');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> _callGetTransactionToken(int id) async {
+    _appendLog('Calling getTransactionToken($id)');
+    _setLoading(true);
+    try {
+      final res = await _fedaFlutter.transactions.getTransactionToken(id);
+      _appendLog('status: ${res.statusCode}');
+      _appendLog(_serialize(res.data));
+    } catch (e) {
+      _appendLog('Error: $e');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> _callCreateTransaction() async {
+    _appendLog('Calling createTransaction()');
+    _setLoading(true);
+    try {
+      final payload = TransactionCreate(
+        description: 'Demo transaction',
+        amount: 2000,
+        currency: CurrencyIso(iso: 'XOF'),
+        callbackUrl: 'https://example.com/callback',
+        customMetadata: {'order_id': '12345'},
+        customer: {'id': '70635'},
+      );
+
+      final res = await _fedaFlutter.transactions.createTransaction(payload);
+      _appendLog('status: ${res.statusCode}');
+      _appendLog(_serialize(res.data));
+    } catch (e) {
+      _appendLog('Error: $e');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> _callCreateCustomer() async {
+    _appendLog('Calling createCustomer()');
+    _setLoading(true);
+    try {
+      final firstname = _custFirstNameController.text.trim();
+      final lastname = _custLastNameController.text.trim();
+      final email = _custEmailController.text.trim();
+      final phone = _custPhoneNumberController.text.trim();
+      final country = _custPhoneCountryController.text.trim();
+
+      // Build a CustomerCreate DTO. Phone number is required by the DTO.
+      final payload = CustomerCreate(
+        firstname: firstname.isEmpty ? 'Demo' : firstname,
+        lastname: lastname.isEmpty ? 'Customer' : lastname,
+        email: email.isEmpty ? 'demo@example.com' : email,
+        phoneNumber: PhoneNumber(
+          number: phone.isEmpty ? '221771234567' : phone,
+          country: country.isEmpty ? 'SN' : country,
+        ),
+      );
+
+      final res = await _fedaFlutter.customers.createCustomer(payload);
+      _appendLog('status: ${res.statusCode}');
+      _appendLog(_serialize(res.data));
+    } catch (e) {
+      _appendLog('Error: $e');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -75,38 +249,182 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _customerIdController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          labelText: 'Customer ID',
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TextField(
+                        controller: _transactionIdController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          labelText: 'Transaction ID',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                // Inputs to create a customer
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _custFirstNameController,
+                            decoration: const InputDecoration(
+                              labelText: 'First name',
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            controller: _custLastNameController,
+                            decoration: const InputDecoration(
+                              labelText: 'Last name',
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _custEmailController,
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: const InputDecoration(
+                              labelText: 'Email',
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            controller: _custPhoneNumberController,
+                            keyboardType: TextInputType.phone,
+                            decoration: const InputDecoration(
+                              labelText: 'Phone number',
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        SizedBox(
+                          width: 80,
+                          child: TextField(
+                            controller: _custPhoneCountryController,
+                            decoration: const InputDecoration(labelText: 'CC'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    ElevatedButton(
+                      onPressed: _callGetCustomers,
+                      child: const Text('Get Customers'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        final id =
+                            int.tryParse(_customerIdController.text) ?? 1;
+                        _callGetCustomer(id);
+                      },
+                      child: const Text('Get Customer (ID)'),
+                    ),
+                    ElevatedButton(
+                      onPressed: _callGetTransactions,
+                      child: const Text('Get Transactions'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        final id =
+                            int.tryParse(_transactionIdController.text) ??
+                            373318;
+                        _callGetTransaction(id);
+                      },
+                      child: const Text('Get Transaction (ID)'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        final id =
+                            int.tryParse(_transactionIdController.text) ??
+                            373318;
+                        _callGetTransactionToken(id);
+                      },
+                      child: const Text('Get Transaction Token (ID)'),
+                    ),
+                    ElevatedButton(
+                      onPressed: _callCreateTransaction,
+                      child: const Text('Create Transaction'),
+                    ),
+                    ElevatedButton(
+                      onPressed: _callCreateCustomer,
+                      child: const Text('Create Customer'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Expanded(
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: _logs.isEmpty
+                        ? const Text(
+                            'No logs yet. Tap a button to run a request.',
+                          )
+                        : ListView.builder(
+                            reverse: true,
+                            itemCount: _logs.length,
+                            itemBuilder: (ctx, i) => Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 6),
+                              child: Text(_logs[i]),
+                            ),
+                          ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+
+          // Loading overlay
+          if (_loading)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withOpacity(0.35),
+                child: const Center(child: CircularProgressIndicator()),
+              ),
+            ),
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      // No floating action button in this example UI.
     );
   }
 }
