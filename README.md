@@ -1,3 +1,60 @@
+# feda_flutter
+
+feda_flutter is an open-source Flutter package that provides a client and UI helpers for interacting with the Feda payment API (transactions, customers, payouts, etc.).
+
+This repository contains:
+- `lib/` — package source (models, repositories, UI widgets)
+- `example/` — example Flutter app demonstrating usage
+- `test/` — unit and widget tests
+
+## Quick start
+
+From a Flutter project add as a dependency (local or published package):
+
+```yaml
+dependencies:
+  feda_flutter:
+    path: ../feda_flutter
+```
+
+Then initialize and use the client in your app:
+
+```dart
+final feda = FedaFlutter(apiKey: 'sk_sandbox_xxx', environment: ApiEnvironment.sandbox);
+feda.initialize();
+
+final res = await feda.transactions.createTransaction(payload);
+```
+
+See `example/` for a full sample app.
+
+For a hands-on playground with ready-to-run snippets and usage examples see `PLAYGROUND.md`.
+
+## Development
+
+Requirements:
+- Flutter SDK (stable)
+- Dart SDK (comes with Flutter)
+
+Useful commands:
+
+```bash
+flutter pub get
+flutter analyze
+flutter test
+flutter format .
+```
+
+## Contributing
+
+feda_flutter is an open source project — contributions are welcome. See `CONTRIBUTING.md` for guidelines on issues, pull requests, testing and commit messages.
+
+## License
+
+This project is licensed under the terms in `LICENSE`.
+
+---
+_Si vous préférez lire la documentation en français, consultez `CONTRIBUTING.md` et `README.md` (les deux contiennent sections en français)._ 
 <!--
 This README describes the package. If you publish this package to pub.dev,
 this README's contents appear on the landing page for your package.

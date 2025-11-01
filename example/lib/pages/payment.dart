@@ -18,7 +18,7 @@ class _PaymentState extends State<Payment> {
   );
 
   final FedaFlutter _fedaFlutter = FedaFlutter(
-    apiKey: 'sk_sandbox_oRoKr1GM3bUyrI4x9m56UoUl',
+    apiKey: 'sk_key_here',
     environment: ApiEnvironment.sandbox,
   );
 
