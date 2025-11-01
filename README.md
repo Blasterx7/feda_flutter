@@ -11,10 +11,8 @@ This repository contains:
 
 From a Flutter project add as a dependency (local or published package):
 
-```yaml
-dependencies:
-  feda_flutter:
-    path: ../feda_flutter
+```bash
+flutter pub add feda_flutter
 ```
 
 Then initialize and use the client in your app:
