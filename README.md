@@ -72,32 +72,85 @@ and the Flutter guide for
 [developing packages and plugins](https://flutter.dev/to/develop-packages).
 -->
 
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+feda_flutter is a lightweight client and UI helper for integrating the Feda
+payments API into Flutter apps and Dart backends. It provides typed repository
+clients for Transactions, Customers and Payouts, helpers for token-first web
+payment flows, a simple WebView-based `PayWidget`, and runnable examples to
+bootstrap integration in real apps.
 
 ## Features
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+- Typed repositories: `TransactionsRepository`, `CustomersRepository`,
+  `PayoutsRepository` with ApiResponse<T> results and robust JSON parsing.
+- Token-first payment flow helpers and a `PayWidget` that opens the payment
+  session in a WebView safely.
+- Example apps: a Flutter e‑commerce example and a Dart Frog backend example
+  (see `example/`).
+- Null-safety and modern Dart patterns; small, dependency-light core.
+- Test helpers and a `FakeDioService` pattern to make unit testing repositories
+  straightforward.
 
 ## Getting started
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+Prerequisites:
+- Flutter SDK (stable channel)
+- Dart SDK (bundled with Flutter)
+
+Quick start:
+
+1. Add the package to your app (local during development):
+
+```yaml
+dependencies:
+  feda_flutter:
+    path: ../feda_flutter
+```
+
+2. Initialize the client early in your app (e.g. in `main`):
+
+```dart
+final feda = FedaFlutter(apiKey: 'sk_sandbox_xxx', environment: ApiEnvironment.sandbox);
+feda.initialize();
+```
+
+3. Use repositories to call the API:
+
+```dart
+final res = await feda.transactions.createTransaction(payload);
+```
+
+See `example/` for full runnable demos.
 
 ## Usage
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
+Short example showing initialization and a transaction creation using an
+existing customer id:
 
 ```dart
-const like = 'sample';
+// Initialize once
+final feda = FedaFlutter(apiKey: 'sk_sandbox_xxx', environment: ApiEnvironment.sandbox);
+feda.initialize();
+
+// Create a transaction for an existing customer
+final payload = TransactionCreate(amount: 1000, currency: CurrencyIso.XOF, customerId: 70635);
+final res = await feda.transactions.createTransaction(payload.toJson());
+if (res.isSuccessful) {
+  final tx = res.data;
+  // proceed with token-first flow or show success
+}
 ```
+
+Longer, runnable examples live in the `example/` folder.
 
 ## Additional information
 
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
+- Issues & contributions: open issues and PRs on this repository. See
+  `CONTRIBUTING.md` for contribution guidelines, commit message format and the
+  PR checklist.
+- Security: do not commit secret API keys. See `SECURITY.md` and the token
+  exchange example in `example/dart_frog_api/` for a recommended approach.
+- License: AGPLv3 for open-source use; commercial licensing available — contact
+  contact@georges-ayeni.com for details.
 
 ## Branch
 
