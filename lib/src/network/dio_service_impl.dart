@@ -3,6 +3,7 @@ import 'package:feda_flutter/src/core/env/api_environment.dart';
 import 'package:feda_flutter/src/core/exceptions/network_exception.dart';
 import 'package:feda_flutter/src/core/models/api_response.dart';
 import 'package:feda_flutter/src/network/dio_service.dart';
+import 'package:flutter/widgets.dart';
 
 class DioServiceImpl implements IDioService {
   final Dio _dio;
@@ -17,7 +18,7 @@ class DioServiceImpl implements IDioService {
       '********',
     );
     final safeMessage = message.replaceAll(apiKey, maskedKey);
-    print(safeMessage);
+    debugPrint(safeMessage);
   }
 
   DioServiceImpl(ApiEnvironment environment, String apiKey)

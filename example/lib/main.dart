@@ -547,6 +547,7 @@ class _MyHomePageState extends State<MyHomePage> {
           if (_loading)
             Positioned.fill(
               child: Container(
+                // ignore: deprecated_member_use
                 color: Colors.black.withOpacity(0.35),
                 child: const Center(child: CircularProgressIndicator()),
               ),

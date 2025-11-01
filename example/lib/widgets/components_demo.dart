@@ -48,11 +48,13 @@ class _ComponentsDemoState extends State<ComponentsDemo> {
     setState(() => _loading = true);
     try {
       final res = await widget.feda.customers.createCustomer(payload);
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Customer created (status ${res.statusCode})')),
       );
     } catch (e) {
       ScaffoldMessenger.of(
+        // ignore: use_build_context_synchronously
         context,
       ).showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
@@ -85,6 +87,7 @@ class _ComponentsDemoState extends State<ComponentsDemo> {
           if (_loading)
             Positioned.fill(
               child: Container(
+                // ignore: deprecated_member_use
                 color: Colors.black.withOpacity(0.35),
                 child: const Center(child: CircularProgressIndicator()),
               ),

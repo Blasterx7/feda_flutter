@@ -11,3 +11,4 @@ const FEDA_API_VERSION_V1 = 'v1';
 // Constants for urls base paths
 const CUSTOMERS_BASE_PATH = '/customers';
 const TRANSACTIONS_BASE_PATH = '/transactions';
+const PAYOUTS_BASE_PATH = '/payouts';
