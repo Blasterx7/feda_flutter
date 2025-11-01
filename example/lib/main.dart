@@ -2,6 +2,7 @@ import 'dart:convert';
 
 // Import the package but hide widget names that are also defined in the
 // example folder to avoid ambiguous imports when using local demo widgets.
+import 'package:app/pages/payment.dart';
 import 'package:feda_flutter/feda_flutter.dart'
     hide TransactionCard, TransactionListView, CustomerFormWidget;
 import 'widgets/transaction_card.dart';
@@ -350,6 +351,15 @@ class _MyHomePageState extends State<MyHomePage> {
                   spacing: 8,
                   runSpacing: 8,
                   children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        // Navigate to payment page
+                        Navigator.of(
+                          context,
+                        ).push(MaterialPageRoute(builder: (ctx) => Payment()));
+                      },
+                      child: const Text('Make payment'),
+                    ),
                     ElevatedButton(
                       onPressed: _callGetCustomers,
                       child: const Text('Get Customers'),

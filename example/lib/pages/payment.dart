@@ -1,3 +1,5 @@
+import 'package:app/pages/failed.dart';
+import 'package:app/pages/success.dart';
 import 'package:feda_flutter/feda_flutter.dart';
 import 'package:flutter/material.dart';
 
@@ -32,8 +34,12 @@ class _PaymentState extends State<Payment> {
     return Scaffold(
       body: PayWidget(
         transactionToCreate: trans,
-        onPaymentFailed: () {},
-        onPaymentSuccess: () {},
+        onPaymentFailed: () => Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (ctx) => const FailedPay())),
+        onPaymentSuccess: () => Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (ctx) => const SuccessPay())),
         instance: _fedaFlutter,
       ),
     );
