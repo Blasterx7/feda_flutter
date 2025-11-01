@@ -49,6 +49,9 @@ class Transaction {
   final String? merchantReference;
   final int? accountId;
   final int? balanceId;
+  final String? paymentToken;
+  final String? paymentUrl;
+  final String? operation;
 
   Transaction({
     required this.id,
@@ -83,6 +86,9 @@ class Transaction {
     this.merchantReference,
     this.accountId,
     this.balanceId,
+    this.paymentToken,
+    this.paymentUrl,
+    this.operation,
   });
 
   factory Transaction.fromJson(Map<String, dynamic> json) {
@@ -147,6 +153,9 @@ class Transaction {
           : (json['balance_id'] != null
                 ? int.tryParse('${json['balance_id']}')
                 : null),
+      paymentToken: json['payment_token'],
+      paymentUrl: json['payment_url'],
+      operation: json['operation'],
     );
   }
 
@@ -235,6 +244,34 @@ class TransactionCreate {
     }
 
     return map;
+  }
+
+}
+
+/// DTO used to perform a direct payment using an existing transaction token.
+class TransactionDirectPayment {
+  final CurrencyIso currency;
+  final String description;
+  final num amount;
+  final String token; // token from an existing transaction
+  final PhoneNumber phoneNumber;
+
+  TransactionDirectPayment({
+    required this.currency,
+    required this.description,
+    required this.amount,
+    required this.token,
+    required this.phoneNumber,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'currency': currency.toJson(),
+      'description': description,
+      'amount': amount,
+      'token': token,
+      'phone_number': phoneNumber.toJson(),
+    };
   }
 }
 

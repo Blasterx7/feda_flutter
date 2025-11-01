@@ -1,7 +1,14 @@
 import 'dart:convert';
 
-import 'package:feda_flutter/feda_flutter.dart';
+// Import the package but hide widget names that are also defined in the
+// example folder to avoid ambiguous imports when using local demo widgets.
+import 'package:feda_flutter/feda_flutter.dart'
+    hide TransactionCard, TransactionListView, CustomerFormWidget;
+import 'widgets/transaction_card.dart';
+import 'widgets/transaction_list_view.dart';
+import 'widgets/customer_form.dart';
 import 'package:flutter/material.dart';
+import 'widgets/components_demo.dart';
 
 void main() {
   runApp(const MyApp());
@@ -384,6 +391,118 @@ class _MyHomePageState extends State<MyHomePage> {
                     ElevatedButton(
                       onPressed: _callCreateCustomer,
                       child: const Text('Create Customer'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (ctx) =>
+                                ComponentsDemo(feda: _fedaFlutter),
+                          ),
+                        );
+                      },
+                      child: const Text('Widgets Demo'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (ctx) =>
+                                ComponentsDemo(feda: _fedaFlutter),
+                          ),
+                        );
+                      },
+                      child: const Text('Widgets Demo'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        // Transaction Card demo page
+                        final sample = Transaction.fromJson({
+                          'id': 373318,
+                          'reference': 'TX-1234',
+                          'amount': 5000,
+                          'description': 'Demo',
+                          'customer_id': 70635,
+                          'created_at': DateTime.now().toIso8601String(),
+                        });
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (ctx) => Scaffold(
+                              appBar: AppBar(
+                                title: const Text('Transaction Card'),
+                              ),
+                              body: Center(
+                                child: TransactionCard(transaction: sample),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                      child: const Text('Transaction Card Demo'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        // Transaction List demo page
+                        final sample = Transaction.fromJson({
+                          'id': 373318,
+                          'reference': 'TX-1234',
+                          'amount': 5000,
+                          'description': 'Demo',
+                          'customer_id': 70635,
+                          'created_at': DateTime.now().toIso8601String(),
+                        });
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (ctx) => Scaffold(
+                              appBar: AppBar(
+                                title: const Text('Transaction List'),
+                              ),
+                              body: TransactionListView(
+                                transactions: [sample],
+                                meta: {
+                                  'current_page': 1,
+                                  'next_page': null,
+                                  'prev_page': null,
+                                  'per_page': 20,
+                                  'total_pages': 1,
+                                  'total_count': 1,
+                                },
+                                onRefresh: () async {},
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                      child: const Text('Transaction List Demo'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        // Customer form demo page
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (ctx) => Scaffold(
+                              appBar: AppBar(
+                                title: const Text('Customer Form'),
+                              ),
+                              body: Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: CustomerForm(
+                                  onSubmit: (payload) {
+                                    ScaffoldMessenger.of(ctx).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          'Submitted: ${payload.toString()}',
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                      child: const Text('Customer Form Demo'),
                     ),
                   ],
                 ),

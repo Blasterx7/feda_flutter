@@ -24,9 +24,12 @@ class FakeDioService implements IDioService {
     String endpoint, {
     Map<String, dynamic>? data,
   }) async {
-    // Simulate server returning created resource — if caller provided an
-    // `id` in the payload we return it, otherwise return payload as-is.
-    final resp = data ?? {};
+    // If a canned response was provided for this endpoint use it,
+    // otherwise fall back to echoing the provided payload (simulate
+    // typical create behaviour in tests).
+    final resp = _responses.containsKey(endpoint)
+        ? _responses[endpoint]
+        : (data ?? {});
     return ApiResponse<dynamic>(data: resp, statusCode: 201);
   }
 
@@ -99,10 +102,10 @@ void main() {
     setUp(() {
       // Build keys the same way as repository (handle trailing slash if any)
       final listKey = TRANSACTIONS_BASE_PATH.endsWith('/')
-          ? TRANSACTIONS_BASE_PATH + 'search'
-          : TRANSACTIONS_BASE_PATH + '/search';
+          ? '${TRANSACTIONS_BASE_PATH}search'
+          : '$TRANSACTIONS_BASE_PATH/search';
       final getKey = TRANSACTIONS_BASE_PATH.endsWith('/')
-          ? TRANSACTIONS_BASE_PATH + '1'
+          ? '${TRANSACTIONS_BASE_PATH}1'
           : '$TRANSACTIONS_BASE_PATH/1';
 
       final fake = FakeDioService({
@@ -129,8 +132,8 @@ void main() {
       'getTransactions returns meta when API payload includes pagination',
       () async {
         final listKey = TRANSACTIONS_BASE_PATH.endsWith('/')
-            ? TRANSACTIONS_BASE_PATH + 'search'
-            : TRANSACTIONS_BASE_PATH + '/search';
+            ? '${TRANSACTIONS_BASE_PATH}search'
+            : '$TRANSACTIONS_BASE_PATH/search';
 
         final wrapped = {
           'v1/transactions': [sampleTransaction],
@@ -186,6 +189,38 @@ void main() {
         expect(res.data, isA<Transaction>());
         expect(res.data!.id, 2);
         expect(res.data!.description, 'Create test');
+      },
+    );
+
+    test(
+      'directPayment posts a mode query and returns transaction with payment fields',
+      () async {
+        final path = '$TRANSACTIONS_BASE_PATH?mode=moov';
+
+        final sampleWithPayment = Map<String, dynamic>.from(sampleTransaction);
+        sampleWithPayment['payment_token'] = 'paytok_123';
+        sampleWithPayment['payment_url'] =
+            'https://process.fedapay.com/paytok_123';
+
+        final fake = FakeDioService({
+          path: {'v1/transaction': sampleWithPayment},
+        });
+        final repo = TransactionsRepository(fake);
+
+        final payload = {
+          'currency': {'iso': 'XOF'},
+          'description': 'Description de la transaction live',
+          'amount': 1000,
+          'token': 'existing_tx_token',
+          'phone_number': {'number': '63744999', 'country': 'BJ'},
+        };
+
+        final res = await repo.directPayment(payload, mode: 'moov');
+
+        expect(res, isA<ApiResponse<Transaction>>());
+        expect(res.data, isA<Transaction>());
+        expect(res.data!.paymentToken, 'paytok_123');
+        expect(res.data!.paymentUrl, 'https://process.fedapay.com/paytok_123');
       },
     );
   });

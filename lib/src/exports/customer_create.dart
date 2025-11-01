@@ -1,2 +1,2 @@
-// Re-export CustomerCreate DTO
+// Re-export ../models/customer_create.dart
 export '../models/customer_create.dart';

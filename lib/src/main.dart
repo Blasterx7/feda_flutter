@@ -1,6 +1,4 @@
 import 'package:feda_flutter/src/exports/index.dart';
-import 'package:feda_flutter/src/repositories/customer_repository.dart';
-import 'package:feda_flutter/src/repositories/transactions_repository.dart';
 
 class FedaFlutter {
   final String apiKey;

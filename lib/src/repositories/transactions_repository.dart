@@ -1,5 +1,7 @@
 import 'package:feda_flutter/src/constants/index.dart';
 import 'package:feda_flutter/src/models/transactions.dart';
+import 'package:feda_flutter/src/network/dio_service_impl.dart';
+import 'package:feda_flutter/src/core/exceptions/network_exception.dart';
 
 import '../core/models/api_response.dart';
 import 'base_repository.dart';
@@ -65,6 +67,45 @@ class TransactionsRepository extends BaseRepository {
           ? data.toJson()
           : data as Map<String, dynamic>;
       final res = await client.post(TRANSACTIONS_BASE_PATH, data: payload);
+      final raw = normalizeApiData(res.data);
+      final transaction = Transaction.fromJson(raw);
+      return ApiResponse<Transaction>(
+        data: transaction,
+        statusCode: res.statusCode,
+      );
+    });
+  }
+
+  /// Perform a direct payment using an existing transaction token.
+  /// The Fedapay API requires this to be executed against the live API.
+  ///
+  /// The method accepts a [TransactionDirectPayment] DTO or a raw map.
+  Future<ApiResponse<Transaction>> directPayment(
+    dynamic data, {
+    String mode = 'moov',
+  }) async {
+    return safeCall(() async {
+      // If we have a concrete DioServiceImpl we can check the baseUrl to
+      // ensure we're hitting the live API. Fake or test clients will not be
+      // DioServiceImpl and will therefore be allowed (so tests can run).
+      final isLive = client is DioServiceImpl
+          ? (client as DioServiceImpl).client.options.baseUrl.startsWith(
+              FEDA_API_URL,
+            )
+          : true;
+
+      if (!isLive) {
+        throw NetworkException(
+          'directPayment is only allowed when using the live API environment',
+        );
+      }
+
+      final payload = data is TransactionDirectPayment
+          ? data.toJson()
+          : data as Map<String, dynamic>;
+
+      final path = '$TRANSACTIONS_BASE_PATH?mode=$mode';
+      final res = await client.post(path, data: payload);
       final raw = normalizeApiData(res.data);
       final transaction = Transaction.fromJson(raw);
       return ApiResponse<Transaction>(
