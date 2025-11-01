@@ -40,7 +40,6 @@ feat(payouts): add PayoutsRepository with create/get
 
 - Écrivez des tests unitaires pour toute logique non triviale.
 - Exécutez `flutter analyze` et `flutter test` avant de soumettre.
-- Formatez le code avec `flutter format .`.
 
 ## Pull Requests
 
