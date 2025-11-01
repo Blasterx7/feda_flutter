@@ -52,15 +52,16 @@ class _PayWidgetState extends State<PayWidget> {
     }
   }
 
-  Future<Transaction> _callGenerateToken(instance) async {
+  Future<TransactionToken> _callGenerateToken({
+    required FedaFlutter instance,
+    int? transactionId,
+  }) async {
     try {
-      final payload = widget.transactionToCreate;
-
-      return await instance.transactions.createTransaction(payload)
-          as Transaction;
+      return await instance.transactions.getTransactionToken(transactionId!)
+          as TransactionToken;
     } catch (e) {
       debugPrint(e.toString());
-      return Transaction(id: 0, amount: 0);
+      return TransactionToken(token: '', url: '');
     } finally {
       debugPrint("Completed");
     }
@@ -74,7 +75,22 @@ class _PayWidgetState extends State<PayWidget> {
       environment: widget.instance.environment,
     );
 
-    await _callCreateTransaction(fedaFlutter);
+    await _callCreateTransaction(fedaFlutter).then((transaction) async {
+      if (transaction.id != 0) {
+        await _callGenerateToken(
+          instance: fedaFlutter,
+          transactionId: transaction.id,
+        ).then((transactionToken) {
+          if (transactionToken.token.isNotEmpty) {
+            _controller.loadRequest(Uri.parse(transactionToken.url));
+          } else {
+            widget.onPaymentFailed();
+          }
+        });
+      } else {
+        widget.onPaymentFailed();
+      }
+    });
   }
 
   @override
