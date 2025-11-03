@@ -55,6 +55,40 @@ if (txId != null) {
 }
 ```
 
+### Server-side token exchange (recommended for production)
+
+Do NOT embed long-lived secret keys in client apps. Instead create a backend
+endpoint that mints short-lived tokens for the client to use when opening the
+payment session. Example (pseudo Dart Frog handler):
+
+```dart
+// POST /session
+Future<Response> createSession(RequestContext ctx) async {
+  final body = await ctx.request.json();
+  // Validate request (amount, customer id, etc.)
+  final res = await http.post(Uri.parse('https://api.feda.example/v1/transactions'),
+    headers: {'Authorization': 'Bearer SK_LONG_LIVED'},
+    body: jsonEncode(body),
+  );
+  final tx = jsonDecode(await res.transform(utf8.decoder).join());
+  // Call token endpoint server-side using long-lived key
+  final tokenRes = await http.get(Uri.parse('https://api.feda.example/v1/transactions/${tx['id']}/token'),
+    headers: {'Authorization': 'Bearer SK_LONG_LIVED'},
+  );
+  final token = jsonDecode(await tokenRes.transform(utf8.decoder).join());
+  // Return only the short-lived token/url to the client
+  return Response.json({'token_url': token['url']});
+}
+```
+
+Client flow:
+1. Client calls your `/session` endpoint (no long-lived key in the client).
+2. Backend creates transaction and fetches token using the server-side key.
+3. Backend returns short-lived token/url to the client which opens it in WebView.
+
+This pattern prevents exposing the long-lived secret key in distributed
+client binaries. See `example/dart_frog_api/` for a ready-to-run sample.
+
 4) Create a payout
 
 ```dart

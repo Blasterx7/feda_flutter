@@ -41,12 +41,30 @@ feat(payouts): add PayoutsRepository with create/get
 - Écrivez des tests unitaires pour toute logique non triviale.
 - Exécutez `flutter analyze` et `flutter test` avant de soumettre.
 
+## Security & secrets
+
+- Do NOT commit secret API keys or environment files to the repository.
+- For production integrations prefer a server-side token exchange pattern:
+	the client requests a short-lived token from your backend, which performs
+	privileged calls with the long-lived secret key. See `PLAYGROUND.md` and
+	the `example/dart_frog_api/` sample for a reference implementation.
+- Use CI secret stores (GitHub Actions secrets) for publishing and avoid
+	injecting secrets in PRs from forks.
+
 ## Pull Requests
 
 - Base de PR : branche `dev`.
 - Décrivez le changement, ajoutez des captures d'écran si nécessaire.
 - Ajoutez des tests pour les nouveaux comportements.
 - Les PR doivent passer les checks CI (analyse + tests) avant d'être mergées.
+
+### PR checklist (recommended)
+- The PR targets `dev` and has a meaningful title & description.
+- Code is formatted (`flutter format .`).
+- `flutter analyze` passes locally.
+- Tests added/updated and passing.
+- No secrets committed (check `.env`, `local.properties`, etc.).
+- If the change is breaking, include migration notes in `docs/MIGRATION.md`.
 
 ## Revue
 

@@ -121,24 +121,67 @@ See `example/` for full runnable demos.
 
 ## Usage
 
-Short example showing initialization and a transaction creation using an
-existing customer id:
+The `example/` app demonstrates common usage patterns. Below is a condensed
+and annotated snippet based on `example/lib/main.dart` showing how to
+initialize the SDK, call repositories, create customers/transactions and
+obtain a transaction token.
 
 ```dart
-// Initialize once
-final feda = FedaFlutter(apiKey: 'sk_sandbox_xxx', environment: ApiEnvironment.sandbox);
+// 1) Initialize once (e.g. in main or top-level stateful widget)
+final feda = FedaFlutter(
+  apiKey: 'sk_sandbox_xxx', // use a sandbox or a short-lived token in prod
+  environment: ApiEnvironment.sandbox,
+);
 feda.initialize();
 
-// Create a transaction for an existing customer
-final payload = TransactionCreate(amount: 1000, currency: CurrencyIso.XOF, customerId: 70635);
-final res = await feda.transactions.createTransaction(payload.toJson());
-if (res.isSuccessful) {
-  final tx = res.data;
-  // proceed with token-first flow or show success
+// 2) Read lists or single resources
+final customersRes = await feda.customers.getCustomers();
+if (customersRes.isSuccessful) {
+  print('Customers: ${customersRes.data}');
 }
+
+final txRes = await feda.transactions.getTransaction(373318);
+if (txRes.isSuccessful) {
+  print('Transaction: ${txRes.data}');
+}
+
+// 3) Create a transaction (using DTO helpers)
+final payload = TransactionCreate(
+  description: 'Demo transaction',
+  amount: 2000,
+  currency: CurrencyIso(iso: 'XOF'),
+  callbackUrl: 'https://example.com/callback',
+  customMetadata: {'order_id': '12345'},
+  // Pass an existing customer by id
+  customer: {'id': '70635'},
+);
+
+final createRes = await feda.transactions.createTransaction(payload);
+if (createRes.isSuccessful) {
+  final created = createRes.data;
+  print('Created tx: ${created?.id}');
+}
+
+// 4) Request a token for a transaction and use it in your UI
+final tokenRes = await feda.transactions.getTransactionToken(created!.id);
+if (tokenRes.isSuccessful) {
+  // tokenRes.data may contain different shapes depending on the API; the
+  // examples use a token URL that can be opened in a WebView.
+  print('Token payload: ${tokenRes.data}');
+}
+
+// 5) Navigate to the example payment page (the example app provides a
+// `Payment` page wired to the token-first flow)
+Navigator.of(context).push(MaterialPageRoute(builder: (_) => Payment()));
+
 ```
 
-Longer, runnable examples live in the `example/` folder.
+Notes:
+- The example app shows many helper widgets (transaction card, list view,
+  customer form) and provides UI buttons to call the repository methods — see
+  `example/lib/main.dart` for a complete reference.
+- For production, avoid embedding secret keys in the client binary — use the
+  token-exchange pattern described in `ROADMAP.md` and `SECURITY.md`.
 
 ## Additional information
 
