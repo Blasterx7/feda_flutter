@@ -26,9 +26,9 @@ High level objectives
 Timeline & Phases (6 months)
 =======================================================================
 Phase A — Month 0–3 (Nov 2025 — Jan 2026)
-- Provider singleton architecture
+- [x] Provider singleton architecture
   - Owner: maintainers
-  - Estimate: 2–3 weeks
+  - Status: DONE (v0.1.0)
   - Deliverables: `FedaFlutter.initialize(...)`, `FedaFlutter.instance`,
     repository constructors accepting client instance, tests and migration notes.
   - Acceptance: examples show single init; tests pass; `flutter analyze` OK.
