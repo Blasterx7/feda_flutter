@@ -269,8 +269,7 @@ Merge policy:
 - Merge strategy: use squash & merge for a clean history or regular merge if
   you prefer to preserve all commits.
 
-If you want, I can add an example `commitlint` + `husky` configuration and a
-commit message template (with pre-commit hooks) — tell me and I'll add them.
+
 
 ## Rédaction des commits
 
@@ -333,6 +332,3 @@ Politique de merge :
 - Pull requests : une PR = une intention/cohérence fonctionnelle (ne pas mélanger 3 features dans la même PR).
 - Revue : demander au moins 1 reviewer; inclure une courte description et les étapes pour tester.
 - Merge : selon la politique du repo — squash & merge pour garder une histoire propre ou merge commits si on veut tout garder.
-
-Si tu veux, je peux générer un exemple de configuration `commitlint` + `husky` et un template de message (pré-commit hooks) — dis‑le et je l'ajouterai.
-

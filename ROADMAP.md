@@ -231,9 +231,4 @@ Objectifs principaux : initialisation unique, meilleur typage, correction des
 bugs token, création de transaction pour customer existant, deux exemples
 exécutables (Flutter e‑commerce + Dart Frog). Horizon : 6 mois (0–3 / 3–6).
 
-Si tu veux, je peux maintenant :
-- A) créer un fichier `docs/MIGRATION.md` avec les étapes de migration détaillées.
-- B) implémenter la PR de provider singleton (création d'une branche `feature/provider`).
-- C) générer les skeletons d'exemples dans `example/`.
 
-Dis‑moi A, B ou C et je lance l'action correspondante.
