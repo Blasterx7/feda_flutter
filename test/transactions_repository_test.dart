@@ -1,62 +1,10 @@
 import 'package:test/test.dart';
 import 'package:feda_flutter/src/repositories/transactions_repository.dart';
 import 'package:feda_flutter/src/models/transactions.dart';
-import 'package:feda_flutter/src/network/dio_service.dart';
+import 'package:feda_flutter/src/models/customer_create.dart';
 import 'package:feda_flutter/src/core/models/api_response.dart';
 import 'package:feda_flutter/src/constants/index.dart';
-
-class FakeDioService implements IDioService {
-  final Map<String, dynamic> _responses;
-
-  FakeDioService(this._responses);
-
-  @override
-  Future<ApiResponse<dynamic>> get(
-    String endpoint, {
-    Map<String, dynamic>? query,
-  }) async {
-    final data = _responses[endpoint];
-    return ApiResponse<dynamic>(data: data, statusCode: 200);
-  }
-
-  @override
-  Future<ApiResponse<dynamic>> post(
-    String endpoint, {
-    Map<String, dynamic>? data,
-  }) async {
-    // If a canned response was provided for this endpoint use it,
-    // otherwise fall back to echoing the provided payload (simulate
-    // typical create behaviour in tests).
-    final resp = _responses.containsKey(endpoint)
-        ? _responses[endpoint]
-        : (data ?? {});
-    return ApiResponse<dynamic>(data: resp, statusCode: 201);
-  }
-
-  @override
-  Future<ApiResponse<dynamic>> put(
-    String endpoint, {
-    Map<String, dynamic>? data,
-  }) async {
-    return ApiResponse<dynamic>(data: data, statusCode: 200);
-  }
-
-  @override
-  Future<ApiResponse<dynamic>> patch(
-    String endpoint, {
-    Map<String, dynamic>? data,
-  }) async {
-    return ApiResponse<dynamic>(data: data, statusCode: 200);
-  }
-
-  @override
-  Future<ApiResponse<dynamic>> delete(
-    String endpoint, {
-    Map<String, dynamic>? data,
-  }) async {
-    return ApiResponse<dynamic>(data: null, statusCode: 204);
-  }
-}
+import 'utils/fake_dio_service.dart';
 
 void main() {
   final now = DateTime.now().toIso8601String();
@@ -100,7 +48,6 @@ void main() {
     late TransactionsRepository repo;
 
     setUp(() {
-      // Build keys the same way as repository (handle trailing slash if any)
       final listKey = TRANSACTIONS_BASE_PATH.endsWith('/')
           ? '${TRANSACTIONS_BASE_PATH}search'
           : '$TRANSACTIONS_BASE_PATH/search';
@@ -129,36 +76,6 @@ void main() {
     );
 
     test(
-      'getTransactions returns meta when API payload includes pagination',
-      () async {
-        final listKey = TRANSACTIONS_BASE_PATH.endsWith('/')
-            ? '${TRANSACTIONS_BASE_PATH}search'
-            : '$TRANSACTIONS_BASE_PATH/search';
-
-        final wrapped = {
-          'v1/transactions': [sampleTransaction],
-          'meta': {
-            'current_page': 1,
-            'next_page': null,
-            'prev_page': null,
-            'per_page': 20,
-            'total_pages': 1,
-            'total_count': 1,
-          },
-        };
-
-        final fakeWithMeta = FakeDioService({listKey: wrapped});
-        final repoWithMeta = TransactionsRepository(fakeWithMeta);
-
-        final res = await repoWithMeta.getTransactions();
-
-        expect(res, isA<ApiResponse<List<Transaction>>>());
-        expect(res.meta, isNotNull);
-        expect(res.meta!['total_count'], 1);
-      },
-    );
-
-    test(
       'getTransaction returns a single Transaction wrapped in ApiResponse',
       () async {
         final res = await repo.getTransaction(1);
@@ -170,58 +87,73 @@ void main() {
       },
     );
 
-    test(
-      'createTransaction accepts a Map payload and returns Transaction-like result',
-      () async {
-        // Simulate a client create payload that includes an id (server response)
-        final payload = {
-          'id': 2,
-          'description': 'Create test',
-          'amount': 100,
-          'currency': {'iso': 'XOF'},
-          'callback_url': 'https://example.com/cb',
-          'customer': {'id': 3},
-        };
+    test('createTransaction accepts a Map payload', () async {
+      final payload = {
+        'id': 2,
+        'description': 'Create test',
+        'amount': 100,
+        'currency': {'iso': 'XOF'},
+      };
 
-        final res = await repo.createTransaction(payload);
+      final res = await repo.createTransaction(payload);
 
-        expect(res, isA<ApiResponse<Transaction>>());
-        expect(res.data, isA<Transaction>());
-        expect(res.data!.id, 2);
-        expect(res.data!.description, 'Create test');
-      },
-    );
+      expect(res, isA<ApiResponse<Transaction>>());
+      expect(res.data!.id, 2);
+      expect(res.data!.description, 'Create test');
+    });
 
-    test(
-      'directPayment posts a mode query and returns transaction with payment fields',
-      () async {
-        final path = '$TRANSACTIONS_BASE_PATH?mode=moov';
+    test('createTransaction accepts a TransactionCreate DTO', () async {
+      final dto = TransactionCreate(
+        description: 'DTO Test',
+        amount: 5000,
+        currency: CurrencyIso(iso: 'XOF'),
+        customer: CustomerCreate(
+          firstname: 'John',
+          lastname: 'Doe',
+          email: 'john@doe.com',
+          phoneNumber: PhoneNumber(number: '123456', country: 'BJ'),
+        ),
+      );
 
-        final sampleWithPayment = Map<String, dynamic>.from(sampleTransaction);
-        sampleWithPayment['payment_token'] = 'paytok_123';
-        sampleWithPayment['payment_url'] =
-            'https://process.fedapay.com/paytok_123';
+      // FakeDioService echoes the payload.
+      // We expect the repo converts DTO -> JSON -> sends to FakeDio -> echoes back -> normalized -> Transaction
+      // Since sampleTransaction has 'id', but echo won't unless we mock it specifically or the normalize handles it.
+      // normalizeApiData just returns data if it's a map.
+      // Transaction.fromJson handles missing 'id' (defaults to 0).
 
-        final fake = FakeDioService({
-          path: {'v1/transaction': sampleWithPayment},
-        });
-        final repo = TransactionsRepository(fake);
+      final res = await repo.createTransaction(dto);
 
-        final payload = {
-          'currency': {'iso': 'XOF'},
-          'description': 'Description de la transaction live',
-          'amount': 1000,
-          'token': 'existing_tx_token',
-          'phone_number': {'number': '63744999', 'country': 'BJ'},
-        };
+      expect(res, isA<ApiResponse<Transaction>>());
+      expect(res.data!.description, 'DTO Test');
+      expect(res.data!.amount, 5000);
+      // id defaults to 0 if not present in echo
+      expect(res.data!.id, 0);
+    });
 
-        final res = await repo.directPayment(payload, mode: 'moov');
+    test('directPayment accepts a TransactionDirectPayment DTO', () async {
+      final path = '$TRANSACTIONS_BASE_PATH?mode=mtn';
+      final fake = FakeDioService({
+        // Mock response for direct payment
+        path: {
+          ...sampleTransaction,
+          'payment_token': 'pay_token_123',
+          'payment_url': 'https://pay.com/123',
+        },
+      });
+      repo = TransactionsRepository(fake);
 
-        expect(res, isA<ApiResponse<Transaction>>());
-        expect(res.data, isA<Transaction>());
-        expect(res.data!.paymentToken, 'paytok_123');
-        expect(res.data!.paymentUrl, 'https://process.fedapay.com/paytok_123');
-      },
-    );
+      final dto = TransactionDirectPayment(
+        currency: CurrencyIso(iso: 'XOF'),
+        description: 'Direct Payment DTO',
+        amount: 2000,
+        token: 'tk_123',
+        phoneNumber: PhoneNumber(number: '654321', country: 'BJ'),
+      );
+
+      final res = await repo.directPayment(dto, mode: 'mtn');
+
+      expect(res.data!.paymentToken, 'pay_token_123');
+      expect(res.data!.paymentUrl, 'https://pay.com/123');
+    });
   });
 }

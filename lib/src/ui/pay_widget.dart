@@ -113,33 +113,41 @@ class _PayWidgetState extends State<PayWidget> {
             'PayWidget: extracted paymentToken=${paymentToken != null ? '[REDACTED]' : 'null'}',
           );
 
-          if (paymentUrl != null && paymentUrl.isNotEmpty) {
-            debugPrint('PayWidget: trying to parse paymentUrl: $paymentUrl');
-            final uri = Uri.tryParse(paymentUrl);
-            debugPrint('PayWidget: Uri.tryParse -> $uri');
-            if (uri == null || uri.scheme.isEmpty) {
+          if (paymentUrl == null || paymentUrl.isEmpty) {
+            if (paymentToken != null && paymentToken.isNotEmpty) {
+              // Fallback: construct URL from token if URL is missing
+              paymentUrl = 'https://checkout.fedapay.com/pay/$paymentToken';
               debugPrint(
-                'PayWidget: invalid payment URL (missing scheme): $paymentUrl',
+                'PayWidget: constructed paymentUrl from token: $paymentUrl',
               );
+            } else {
+              debugPrint('PayWidget: no paymentUrl and no paymentToken found');
               widget.onPaymentFailed();
               return;
             }
-
-            final sep = paymentUrl.contains('?') ? '&' : '?';
-            final full = paymentToken != null && paymentToken.isNotEmpty
-                ? '$paymentUrl${sep}token=${Uri.encodeComponent(paymentToken)}'
-                : paymentUrl;
-
-            debugPrint('PayWidget: loading full payment URL: $full');
-            setState(() {
-              _isLoading = false;
-              debugPrint("PayWidget: loading full payment URL: $full");
-              _controller.loadRequest(Uri.parse(full));
-            });
-          } else {
-            debugPrint('PayWidget: no paymentUrl found in response');
-            widget.onPaymentFailed();
           }
+
+          debugPrint('PayWidget: final paymentUrl: $paymentUrl');
+
+          final uri = Uri.tryParse(paymentUrl);
+          debugPrint('PayWidget: Uri.tryParse -> $uri');
+          if (uri == null || uri.scheme.isEmpty) {
+            debugPrint(
+              'PayWidget: invalid payment URL (missing scheme): $paymentUrl',
+            );
+            widget.onPaymentFailed();
+            return;
+          }
+
+          // In standard flow, the token is already in the URL path (e.g. /pay/TOKEN).
+          // If we had a clean URL without token, we might append it here.
+          // For now, we assume paymentUrl is complete or we constructed it.
+
+          setState(() {
+            _isLoading = false;
+            debugPrint("PayWidget: loading full payment URL: $paymentUrl");
+            _controller.loadRequest(Uri.parse(paymentUrl!));
+          });
         })
         .catchError((e, st) {
           debugPrint('PayWidget: create transaction threw: $e\n$st');

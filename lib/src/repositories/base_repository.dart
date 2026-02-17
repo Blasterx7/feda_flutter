@@ -43,17 +43,20 @@ abstract class BaseRepository {
   @protected
   dynamic normalizeApiData(dynamic data) {
     if (data is Map && data.length == 1) {
-      try {
-        final key = data.keys.first;
-        final value = data.values.first;
-        // Debug info for wrapped responses
-        // ignore: avoid_print
-        print(
-          'BaseRepository: unwrapped API payload key="$key" -> ${value.runtimeType}',
-        );
-        return value;
-      } catch (_) {
-        return data;
+      final key = data.keys.first.toString();
+      // Only unwrap if the key explicitly looks like a wrapper namespace.
+      // Fedapay often returns keys like "v1/transaction", "v1/customer".
+      // We also handle "transaction", "customer", "payout" just in case.
+      if (key.startsWith('v1/') ||
+          {
+            'transaction',
+            'customer',
+            'payout',
+            'payouts',
+            'customers',
+            'transactions',
+          }.contains(key)) {
+        return data.values.first;
       }
     }
     return data;

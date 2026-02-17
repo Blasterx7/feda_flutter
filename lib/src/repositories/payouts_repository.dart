@@ -12,7 +12,10 @@ class PayoutsRepository extends BaseRepository {
       final path = joinPath(PAYOUTS_BASE_PATH, 'search');
       final res = await client.get(path);
       final collection = PayoutCollection.fromApi(res.data);
-      return ApiResponse<List<Payout>>(data: collection.payouts, statusCode: res.statusCode, meta: collection.meta?.toJson());
+      return ApiResponse<List<Payout>>(
+          data: collection.payouts,
+          statusCode: res.statusCode,
+          meta: collection.meta?.toJson());
     });
   }
 
@@ -29,7 +32,8 @@ class PayoutsRepository extends BaseRepository {
   /// Create a payout
   Future<ApiResponse<Payout>> createPayout(dynamic data) async {
     return safeCall(() async {
-      final payload = data is PayoutCreate ? data.toJson() : data as Map<String, dynamic>;
+      final payload =
+          data is PayoutCreate ? data.toJson() : data as Map<String, dynamic>;
       final res = await client.post(PAYOUTS_BASE_PATH, data: payload);
       final raw = normalizeApiData(res.data);
       final payout = Payout.fromJson(raw);
@@ -40,7 +44,8 @@ class PayoutsRepository extends BaseRepository {
   /// Update a payout
   Future<ApiResponse<Payout>> updatePayout(int id, dynamic data) async {
     return safeCall(() async {
-      final payload = data is PayoutCreate ? data.toJson() : data as Map<String, dynamic>;
+      final payload =
+          data is PayoutCreate ? data.toJson() : data as Map<String, dynamic>;
       final res = await client.put('$PAYOUTS_BASE_PATH/$id', data: payload);
       final raw = normalizeApiData(res.data);
       final payout = Payout.fromJson(raw);

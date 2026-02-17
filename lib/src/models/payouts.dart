@@ -68,10 +68,14 @@ class Payout {
       status: json['status'],
       customerId: json['customer_id'] is int
           ? json['customer_id']
-          : (json['customer_id'] != null ? int.tryParse('${json['customer_id']}') : null),
+          : (json['customer_id'] != null
+              ? int.tryParse('${json['customer_id']}')
+              : null),
       currencyId: json['currency_id'] is int
           ? json['currency_id']
-          : (json['currency_id'] != null ? int.tryParse('${json['currency_id']}') : null),
+          : (json['currency_id'] != null
+              ? int.tryParse('${json['currency_id']}')
+              : null),
       mode: json['mode'],
       lastErrorCode: json['last_error_code'],
       commission: parseNumNullable(json['commission']),
@@ -85,19 +89,29 @@ class Payout {
       sentAt: parseDate(json['sent_at']),
       failedAt: parseDate(json['failed_at']),
       deletedAt: parseDate(json['deleted_at']),
-      metadata: json['metadata'] != null ? Map<String, dynamic>.from(json['metadata']) : null,
-      customMetadata: json['custom_metadata'] != null ? Map<String, dynamic>.from(json['custom_metadata']) : null,
+      metadata: json['metadata'] != null
+          ? Map<String, dynamic>.from(json['metadata'])
+          : null,
+      customMetadata: json['custom_metadata'] != null
+          ? Map<String, dynamic>.from(json['custom_metadata'])
+          : null,
       paymentMethodId: json['payment_method_id'] is int
           ? json['payment_method_id']
-          : (json['payment_method_id'] != null ? int.tryParse('${json['payment_method_id']}') : null),
+          : (json['payment_method_id'] != null
+              ? int.tryParse('${json['payment_method_id']}')
+              : null),
       transactionKey: json['transaction_key'],
       merchantReference: json['merchant_reference'],
       accountId: json['account_id'] is int
           ? json['account_id']
-          : (json['account_id'] != null ? int.tryParse('${json['account_id']}') : null),
+          : (json['account_id'] != null
+              ? int.tryParse('${json['account_id']}')
+              : null),
       balanceId: json['balance_id'] is int
           ? json['balance_id']
-          : (json['balance_id'] != null ? int.tryParse('${json['balance_id']}') : null),
+          : (json['balance_id'] != null
+              ? int.tryParse('${json['balance_id']}')
+              : null),
     );
   }
 
@@ -139,7 +153,11 @@ class PayoutCreate {
   final CustomerCreate customer;
   final String? mode;
 
-  PayoutCreate({required this.amount, required this.currency, required this.customer, this.mode});
+  PayoutCreate(
+      {required this.amount,
+      required this.currency,
+      required this.customer,
+      this.mode});
 
   Map<String, dynamic> toJson() {
     return {
@@ -159,7 +177,9 @@ class PayoutCollection {
 
   factory PayoutCollection.fromApi(dynamic payload) {
     if (payload is List) {
-      final list = payload.map((e) => Payout.fromJson(Map<String, dynamic>.from(e))).toList();
+      final list = payload
+          .map((e) => Payout.fromJson(Map<String, dynamic>.from(e)))
+          .toList();
       return PayoutCollection(payouts: list, meta: null);
     }
 
@@ -169,9 +189,12 @@ class PayoutCollection {
 
       payload.forEach((key, value) {
         if (listValue == null && value is List) {
-          if (value.isNotEmpty && value.first is Map && (value.first as Map).containsKey('id')) {
+          if (value.isNotEmpty &&
+              value.first is Map &&
+              (value.first as Map).containsKey('id')) {
             listValue = value;
-          } else if (listValue == null && key.toLowerCase().contains('payout')) {
+          } else if (listValue == null &&
+              key.toLowerCase().contains('payout')) {
             listValue = value;
           }
         }
@@ -184,7 +207,9 @@ class PayoutCollection {
       final payouts = <Payout>[];
       if (listValue != null) {
         for (final item in listValue!) {
-          if (item is Map) payouts.add(Payout.fromJson(Map<String, dynamic>.from(item)));
+          if (item is Map) {
+            payouts.add(Payout.fromJson(Map<String, dynamic>.from(item)));
+          }
         }
       }
 
