@@ -11,14 +11,14 @@ Prerequisites
 ```dart
 import 'package:feda_flutter/feda_flutter.dart';
 
-final feda = FedaFlutter(
-  apiKey: 'sk_sandbox_xxx',
-  environment: ApiEnvironment.sandbox,
-);
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  feda.initialize();
+  
+  FedaFlutter.applyConfig(
+    apiKey: 'sk_sandbox_xxx',
+    environment: ApiEnvironment.sandbox,
+  );
+  
   runApp(MyApp());
 }
 ```
@@ -35,7 +35,7 @@ final payload = TransactionCreate(
   customer: {'id': '70635'},
 );
 
-final res = await feda.transactions.createTransaction(payload);
+final res = await FedaFlutter.instance.transactions.createTransaction(payload);
 if (res.data != null) {
   final tx = res.data!;
   print('Created tx id=${tx.id} payment_url=${tx.paymentUrl}');
@@ -46,10 +46,10 @@ if (res.data != null) {
 
 ```dart
 // After creating transaction, call token endpoint
-final createRes = await feda.transactions.createTransaction(payload);
+final createRes = await FedaFlutter.instance.transactions.createTransaction(payload);
 final txId = createRes.data?.id;
 if (txId != null) {
-  final tokenRes = await feda.transactions.getTransactionToken(txId);
+  final tokenRes = await FedaFlutter.instance.transactions.getTransactionToken(txId);
   final tokenUrl = tokenRes.data?.url;
   // Validate and open in WebView
 }
@@ -104,7 +104,7 @@ final payout = PayoutCreate(
   mode: 'moov',
 );
 
-final payoutRes = await feda.payouts.createPayout(payout);
+final payoutRes = await FedaFlutter.instance.payouts.createPayout(payout);
 if (payoutRes.data != null) print('Created payout id=${payoutRes.data!.id}');
 ```
 
@@ -112,7 +112,7 @@ if (payoutRes.data != null) print('Created payout id=${payoutRes.data!.id}');
 
 ```dart
 PayWidget(
-  instance: feda,
+  instance: FedaFlutter.instance,
   transactionToCreate: payload,
   onPaymentSuccess: () => print('Payment success'),
   onPaymentFailed: () => print('Payment failed'),

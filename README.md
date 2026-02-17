@@ -18,10 +18,11 @@ flutter pub add feda_flutter
 Then initialize and use the client in your app:
 
 ```dart
-final feda = FedaFlutter(apiKey: 'sk_sandbox_xxx', environment: ApiEnvironment.sandbox);
-feda.initialize();
+// 1. Initialize globally (e.g. in main.dart)
+FedaFlutter.applyConfig(apiKey: 'sk_sandbox_xxx', environment: ApiEnvironment.sandbox);
 
-final res = await feda.transactions.createTransaction(payload);
+// 2. Use anywhere in your app
+final res = await FedaFlutter.instance.transactions.createTransaction(payload);
 ```
 
 See `example/` for a full sample app.
@@ -107,14 +108,13 @@ dependencies:
 2. Initialize the client early in your app (e.g. in `main`):
 
 ```dart
-final feda = FedaFlutter(apiKey: 'sk_sandbox_xxx', environment: ApiEnvironment.sandbox);
-feda.initialize();
+FedaFlutter.applyConfig(apiKey: 'sk_sandbox_xxx', environment: ApiEnvironment.sandbox);
 ```
 
 3. Use repositories to call the API:
 
 ```dart
-final res = await feda.transactions.createTransaction(payload);
+final res = await FedaFlutter.instance.transactions.createTransaction(payload);
 ```
 
 See `example/` for full runnable demos.
@@ -127,20 +127,19 @@ initialize the SDK, call repositories, create customers/transactions and
 obtain a transaction token.
 
 ```dart
-// 1) Initialize once (e.g. in main or top-level stateful widget)
-final feda = FedaFlutter(
+// 1) Initialize once (e.g. in main)
+FedaFlutter.applyConfig(
   apiKey: 'sk_sandbox_xxx', // use a sandbox or a short-lived token in prod
   environment: ApiEnvironment.sandbox,
 );
-feda.initialize();
 
-// 2) Read lists or single resources
-final customersRes = await feda.customers.getCustomers();
+// 2) Read lists or single resources using the singleton instance
+final customersRes = await FedaFlutter.instance.customers.getCustomers();
 if (customersRes.isSuccessful) {
   print('Customers: ${customersRes.data}');
 }
 
-final txRes = await feda.transactions.getTransaction(373318);
+final txRes = await FedaFlutter.instance.transactions.getTransaction(373318);
 if (txRes.isSuccessful) {
   print('Transaction: ${txRes.data}');
 }
@@ -156,14 +155,14 @@ final payload = TransactionCreate(
   customer: {'id': '70635'},
 );
 
-final createRes = await feda.transactions.createTransaction(payload);
+final createRes = await FedaFlutter.instance.transactions.createTransaction(payload);
 if (createRes.isSuccessful) {
   final created = createRes.data;
   print('Created tx: ${created?.id}');
 }
 
 // 4) Request a token for a transaction and use it in your UI
-final tokenRes = await feda.transactions.getTransactionToken(created!.id);
+final tokenRes = await FedaFlutter.instance.transactions.getTransactionToken(created!.id);
 if (tokenRes.isSuccessful) {
   // tokenRes.data may contain different shapes depending on the API; the
   // examples use a token URL that can be opened in a WebView.
