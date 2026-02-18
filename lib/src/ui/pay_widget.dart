@@ -28,6 +28,9 @@ class PayWidget extends StatefulWidget {
   final Map<String, dynamic>? customer;
   final String? description;
   final String? mode;
+  /// Optional callback URL for payment status notifications.
+  /// Note: If not provided, you must configure a default callback URL
+  /// in your FedaPay dashboard or handle the transaction status differently.
   final String? callbackUrl;
 
   // Whitelist of allowed payment domains
@@ -146,7 +149,7 @@ class _PayWidgetState extends State<PayWidget> {
           }
 
           // Validate that the URL is from an allowed domain
-          if (!uri.scheme.startsWith('http')) {
+          if (uri.scheme != 'http' && uri.scheme != 'https') {
             debugPrint(
               'PayWidget: invalid payment URL scheme (expected https/http): ${uri.scheme}',
             );
@@ -215,26 +218,22 @@ class _PayWidgetState extends State<PayWidget> {
             
             return NavigationDecision.navigate;
           },
-          onUrlChange: (change) => {
-            debugPrint("URL changed: ${change.url}"),
-            // Use more precise URL matching for payment status
-            if (change.url != null)
-              {
-                if (change.url!.endsWith('/status/success') ||
-                    change.url!.contains('/status/success?') ||
-                    change.url!.contains('/status/success#'))
-                  {
-                    debugPrint('Payment success detected'),
-                    widget.onPaymentSuccess(),
-                  }
-                else if (change.url!.endsWith('/status/failure') ||
-                    change.url!.contains('/status/failure?') ||
-                    change.url!.contains('/status/failure#'))
-                  {
-                    debugPrint('Payment failure detected'),
-                    widget.onPaymentFailed(),
-                  },
-              },
+          onUrlChange: (change) {
+            debugPrint("URL changed: ${change.url}");
+            // Use precise URL path matching for payment status
+            if (change.url != null) {
+              final uri = Uri.tryParse(change.url!);
+              if (uri != null && uri.path.isNotEmpty) {
+                // Check if path ends with the status endpoints
+                if (uri.path.endsWith('/status/success')) {
+                  debugPrint('Payment success detected');
+                  widget.onPaymentSuccess();
+                } else if (uri.path.endsWith('/status/failure')) {
+                  debugPrint('Payment failure detected');
+                  widget.onPaymentFailed();
+                }
+              }
+            }
           },
         ),
       )
