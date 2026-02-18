@@ -1,3 +1,10 @@
+## 0.2.0
+
+* Enforced strict typing in `TransactionsRepository`, `CustomersRepository`, and `PayoutsRepository` — methods now accept typed DTOs and return `ApiResponse<T>`.
+* Fixed `PayWidget` to handle token-only API responses by constructing the checkout URL as a fallback.
+* Improved `BaseRepository.normalizeApiData` to only unwrap known Fedapay wrapper keys (`v1/*`).
+* Refactored test suite to use a shared `FakeDioService` and added DTO-specific test cases.
+
 ## 0.1.0
 
 * Added Singleton pattern for `FedaFlutter` initialization (issue #).
