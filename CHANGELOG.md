@@ -1,3 +1,10 @@
+## 0.2.1
+
+* Added Nuxt-based documentation site in `docs/`.
+* Added Nuxt-based changelog site in `change/`.
+* Added GitHub Actions workflow to auto-create releases from `CHANGELOG.md` on tag push.
+* Added GitHub PR template.
+
 ## 0.2.0
 
 * Enforced strict typing in `TransactionsRepository`, `CustomersRepository`, and `PayoutsRepository` — methods now accept typed DTOs and return `ApiResponse<T>`.
