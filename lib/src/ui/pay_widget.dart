@@ -15,7 +15,7 @@ class PayWidget extends StatefulWidget {
     this.customer,
     this.description,
     this.mode,
-    this.callbackUrl = 'https://georges-ayeni.com',
+    this.callbackUrl,
   });
 
   final FedaFlutter instance;
@@ -29,6 +29,12 @@ class PayWidget extends StatefulWidget {
   final String? description;
   final String? mode;
   final String? callbackUrl;
+
+  // Whitelist of allowed payment domains
+  static const List<String> _allowedPaymentDomains = [
+    'checkout.fedapay.com',
+    'fedapay.com',
+  ];
 
   @override
   State<PayWidget> createState() => _PayWidgetState();
@@ -50,7 +56,7 @@ class _PayWidgetState extends State<PayWidget> {
           description: widget.description ?? 'Payment',
           amount: widget.amount ?? 0,
           currency: widget.currency ?? CurrencyIso(iso: 'XOF'),
-          callbackUrl: widget.callbackUrl ?? 'https://georges-ayeni.com',
+          callbackUrl: widget.callbackUrl,
           customMetadata: null,
           customer: widget.customer,
         );
@@ -139,6 +145,28 @@ class _PayWidgetState extends State<PayWidget> {
             return;
           }
 
+          // Validate that the URL is from an allowed domain
+          if (!uri.scheme.startsWith('http')) {
+            debugPrint(
+              'PayWidget: invalid payment URL scheme (expected https/http): ${uri.scheme}',
+            );
+            widget.onPaymentFailed();
+            return;
+          }
+
+          final host = uri.host.toLowerCase();
+          final isAllowedDomain = PayWidget._allowedPaymentDomains.any(
+            (domain) => host == domain || host.endsWith('.$domain'),
+          );
+
+          if (!isAllowedDomain) {
+            debugPrint(
+              'PayWidget: payment URL domain not in whitelist: $host',
+            );
+            widget.onPaymentFailed();
+            return;
+          }
+
           // In standard flow, the token is already in the URL path (e.g. /pay/TOKEN).
           // If we had a clean URL without token, we might append it here.
           // For now, we assume paymentUrl is complete or we constructed it.
@@ -170,19 +198,42 @@ class _PayWidgetState extends State<PayWidget> {
           onPageStarted: (String url) {},
           onNavigationRequest: (NavigationRequest request) {
             debugPrint("Navigation request: ${request.url}");
+            
+            // Validate navigation target against whitelist
+            final uri = Uri.tryParse(request.url);
+            if (uri != null && uri.host.isNotEmpty) {
+              final host = uri.host.toLowerCase();
+              final isAllowed = PayWidget._allowedPaymentDomains.any(
+                (domain) => host == domain || host.endsWith('.$domain'),
+              );
+              
+              if (!isAllowed) {
+                debugPrint("Navigation blocked: domain not in whitelist: $host");
+                return NavigationDecision.prevent;
+              }
+            }
+            
             return NavigationDecision.navigate;
           },
           onUrlChange: (change) => {
             debugPrint("URL changed: ${change.url}"),
-            if (change.url!.contains('status/success'))
+            // Use more precise URL matching for payment status
+            if (change.url != null)
               {
-                debugPrint('Payment success detected'),
-                widget.onPaymentSuccess(),
-              }
-            else if (change.url!.contains('status/failure'))
-              {
-                debugPrint('Payment failure detected'),
-                widget.onPaymentFailed(),
+                if (change.url!.endsWith('/status/success') ||
+                    change.url!.contains('/status/success?') ||
+                    change.url!.contains('/status/success#'))
+                  {
+                    debugPrint('Payment success detected'),
+                    widget.onPaymentSuccess(),
+                  }
+                else if (change.url!.endsWith('/status/failure') ||
+                    change.url!.contains('/status/failure?') ||
+                    change.url!.contains('/status/failure#'))
+                  {
+                    debugPrint('Payment failure detected'),
+                    widget.onPaymentFailed(),
+                  },
               },
           },
         ),
