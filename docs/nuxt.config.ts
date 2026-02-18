@@ -30,6 +30,17 @@ export default defineNuxtConfig({
       markdown: {
         toc: {
           searchDepth: 1
+        },
+        highlight: {
+          // VS Code-like syntax highlighting
+          theme: {
+            default: 'github-dark',
+            light: 'github-light',
+            dark: 'one-dark-pro'
+          },
+          langs: [
+            'dart', 'yaml', 'bash', 'typescript', 'javascript', 'json', 'markdown'
+          ]
         }
       }
     }
