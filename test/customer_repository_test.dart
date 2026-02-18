@@ -1,55 +1,9 @@
 import 'package:test/test.dart';
 import 'package:feda_flutter/src/repositories/customer_repository.dart';
 import 'package:feda_flutter/src/models/customers.dart';
-import 'package:feda_flutter/src/network/dio_service.dart';
+import 'package:feda_flutter/src/models/customer_create.dart';
 import 'package:feda_flutter/src/core/models/api_response.dart';
-
-class FakeDioService implements IDioService {
-  final Map<String, dynamic> _responses;
-
-  FakeDioService(this._responses);
-
-  @override
-  Future<ApiResponse<dynamic>> get(
-    String endpoint, {
-    Map<String, dynamic>? query,
-  }) async {
-    final data = _responses[endpoint];
-    return ApiResponse<dynamic>(data: data, statusCode: 200);
-  }
-
-  @override
-  Future<ApiResponse<dynamic>> post(
-    String endpoint, {
-    Map<String, dynamic>? data,
-  }) async {
-    return ApiResponse<dynamic>(data: data, statusCode: 201);
-  }
-
-  @override
-  Future<ApiResponse<dynamic>> put(
-    String endpoint, {
-    Map<String, dynamic>? data,
-  }) async {
-    return ApiResponse<dynamic>(data: data, statusCode: 200);
-  }
-
-  @override
-  Future<ApiResponse<dynamic>> patch(
-    String endpoint, {
-    Map<String, dynamic>? data,
-  }) async {
-    return ApiResponse<dynamic>(data: data, statusCode: 200);
-  }
-
-  @override
-  Future<ApiResponse<dynamic>> delete(
-    String endpoint, {
-    Map<String, dynamic>? data,
-  }) async {
-    return ApiResponse<dynamic>(data: null, statusCode: 204);
-  }
-}
+import 'utils/fake_dio_service.dart';
 
 void main() {
   // Generic sample customer JSON. Replace values as needed.
@@ -100,5 +54,28 @@ void main() {
         expect(res.data!.id, 1);
       },
     );
+
+    test('createCustomer accepts CustomerCreate DTO', () async {
+      final dto = CustomerCreate(
+        firstname: 'DTO',
+        lastname: 'Test',
+        email: 'dto@test.com',
+        phoneNumber: PhoneNumber(number: '99887766', country: 'BJ'),
+      );
+
+      final fake = FakeDioService({
+        '/customers': {
+          ...sampleCustomer,
+          'firstname': 'DTO',
+          'lastname': 'Test',
+        },
+      });
+      repo = CustomersRepository(fake);
+
+      final res = await repo.createCustomer(dto);
+
+      expect(res.data!.firstname, 'DTO');
+      expect(res.data!.lastname, 'Test');
+    });
   });
 }

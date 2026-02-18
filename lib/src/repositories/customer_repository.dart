@@ -40,9 +40,8 @@ class CustomersRepository extends BaseRepository {
   /// (nested `phone_number`).
   Future<ApiResponse<Customer>> createCustomer(dynamic data) async {
     return safeCall(() async {
-      final payload = data is CustomerCreate
-          ? data.toJson()
-          : data as Map<String, dynamic>;
+      final payload =
+          data is CustomerCreate ? data.toJson() : data as Map<String, dynamic>;
       final res = await client.post(CUSTOMERS_BASE_PATH, data: payload);
       final raw = normalizeApiData(res.data);
       final customer = Customer.fromJson(raw);
@@ -57,9 +56,8 @@ class CustomersRepository extends BaseRepository {
   /// (nested `phone_number`).
   Future<ApiResponse<Customer>> updateCustomer(int id, dynamic data) async {
     return safeCall(() async {
-      final payload = data is CustomerCreate
-          ? data.toJson()
-          : data as Map<String, dynamic>;
+      final payload =
+          data is CustomerCreate ? data.toJson() : data as Map<String, dynamic>;
       final res = await client.put('$CUSTOMERS_BASE_PATH/$id', data: payload);
       final raw = normalizeApiData(res.data);
       final customer = Customer.fromJson(raw);

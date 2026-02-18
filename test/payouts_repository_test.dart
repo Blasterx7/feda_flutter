@@ -1,42 +1,11 @@
 import 'package:test/test.dart';
 import 'package:feda_flutter/src/repositories/payouts_repository.dart';
 import 'package:feda_flutter/src/models/payouts.dart';
-import 'package:feda_flutter/src/network/dio_service.dart';
+import 'package:feda_flutter/src/models/customer_create.dart';
+import 'package:feda_flutter/src/models/transactions.dart'; // For CurrencyIso
 import 'package:feda_flutter/src/core/models/api_response.dart';
 import 'package:feda_flutter/src/constants/index.dart';
-
-class FakeDioService implements IDioService {
-  final Map<String, dynamic> _responses;
-
-  FakeDioService(this._responses);
-
-  @override
-  Future<ApiResponse<dynamic>> get(String endpoint, {Map<String, dynamic>? query}) async {
-    final data = _responses[endpoint];
-    return ApiResponse<dynamic>(data: data, statusCode: 200);
-  }
-
-  @override
-  Future<ApiResponse<dynamic>> post(String endpoint, {Map<String, dynamic>? data}) async {
-    final resp = _responses.containsKey(endpoint) ? _responses[endpoint] : (data ?? {});
-    return ApiResponse<dynamic>(data: resp, statusCode: 201);
-  }
-
-  @override
-  Future<ApiResponse<dynamic>> put(String endpoint, {Map<String, dynamic>? data}) async {
-    return ApiResponse<dynamic>(data: data, statusCode: 200);
-  }
-
-  @override
-  Future<ApiResponse<dynamic>> patch(String endpoint, {Map<String, dynamic>? data}) async {
-    return ApiResponse<dynamic>(data: data, statusCode: 200);
-  }
-
-  @override
-  Future<ApiResponse<dynamic>> delete(String endpoint, {Map<String, dynamic>? data}) async {
-    return ApiResponse<dynamic>(data: null, statusCode: 204);
-  }
-}
+import 'utils/fake_dio_service.dart';
 
 void main() {
   final now = DateTime.now().toIso8601String();
@@ -74,8 +43,12 @@ void main() {
     late PayoutsRepository repo;
 
     setUp(() {
-      final listKey = PAYOUTS_BASE_PATH.endsWith('/') ? '${PAYOUTS_BASE_PATH}search' : '$PAYOUTS_BASE_PATH/search';
-      final getKey = PAYOUTS_BASE_PATH.endsWith('/') ? '${PAYOUTS_BASE_PATH}123' : '$PAYOUTS_BASE_PATH/123';
+      final listKey = PAYOUTS_BASE_PATH.endsWith('/')
+          ? '${PAYOUTS_BASE_PATH}search'
+          : '$PAYOUTS_BASE_PATH/search';
+      final getKey = PAYOUTS_BASE_PATH.endsWith('/')
+          ? '${PAYOUTS_BASE_PATH}123'
+          : '$PAYOUTS_BASE_PATH/123';
 
       final fake = FakeDioService({
         listKey: [samplePayout],
@@ -101,23 +74,31 @@ void main() {
       expect(res.data!.reference, 'payout_123');
     });
 
-    test('createPayout accepts PayoutCreate and returns created payout', () async {
-      final payload = {
-        'amount': 2000,
-        'currency': {'iso': 'XOF'},
-        'customer': {
-          'firstname': 'John',
-          'lastname': 'Doe',
-          'email': 'john@example.com',
-          'phone_number': {'number': '221771234567', 'country': 'SN'},
-        },
-        'mode': 'moov',
-      };
+    test('createPayout accepts PayoutCreate DTO', () async {
+      final dto = PayoutCreate(
+        amount: 3000,
+        currency: CurrencyIso(iso: 'XOF'),
+        customer: CustomerCreate(
+          firstname: 'Payout',
+          lastname: 'Receiver',
+          email: 'payout@test.com',
+          phoneNumber: PhoneNumber(number: '221770000000', country: 'SN'),
+        ),
+        mode: 'moov',
+      );
 
-      final res = await repo.createPayout(payload);
+      final fake = FakeDioService({
+        // Echo creation for payout doesn't usually return the exact same object shape
+        // as the input but simplified for testing:
+        PAYOUTS_BASE_PATH: {...samplePayout, 'amount': 3000, 'mode': 'moov'},
+      });
+      repo = PayoutsRepository(fake);
+
+      final res = await repo.createPayout(dto);
       expect(res, isA<ApiResponse<Payout>>());
       expect(res.data, isA<Payout>());
-      expect(res.data!.amount, 2000);
+      expect(res.data!.amount, 3000);
+      expect(res.data!.mode, 'moov');
     });
   });
 }

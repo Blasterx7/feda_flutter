@@ -90,8 +90,8 @@ class TransactionsRepository extends BaseRepository {
       // DioServiceImpl and will therefore be allowed (so tests can run).
       final isLive = client is DioServiceImpl
           ? (client as DioServiceImpl).client.options.baseUrl.startsWith(
-              FEDA_API_URL,
-            )
+                FEDA_API_URL,
+              )
           : true;
 
       if (!isLive) {
