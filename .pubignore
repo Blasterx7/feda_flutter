@@ -1,0 +1,11 @@
+# Exclude web projects from the pub.dev package
+change/
+docs/
+
+# Exclude dev/CI tooling
+.agent/
+.github/
+
+# Exclude playground and internal docs
+PLAYGROUND.md
+ROADMAP.md
