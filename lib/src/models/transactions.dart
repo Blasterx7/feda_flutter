@@ -4,6 +4,7 @@ import 'customer_create.dart';
 import 'customers.dart';
 import '../utils/json_parsers.dart';
 
+/// Represents a currency identified by its ISO code (e.g. `'XOF'`).
 class CurrencyIso {
   final String iso;
 
@@ -16,6 +17,10 @@ class CurrencyIso {
   Map<String, dynamic> toJson() => {'iso': iso};
 }
 
+/// Represents a FedaPay transaction.
+///
+/// Transactions are the core resource of the FedaPay API. They represent
+/// a payment intent between your app and a customer.
 class Transaction {
   final int id;
   final String? reference;
@@ -104,13 +109,13 @@ class Transaction {
       customerId: json['customer_id'] is int
           ? json['customer_id']
           : (json['customer_id'] != null
-                ? int.tryParse('${json['customer_id']}')
-                : null),
+              ? int.tryParse('${json['customer_id']}')
+              : null),
       currencyId: json['currency_id'] is int
           ? json['currency_id']
           : (json['currency_id'] != null
-                ? int.tryParse('${json['currency_id']}')
-                : null),
+              ? int.tryParse('${json['currency_id']}')
+              : null),
       mode: json['mode'],
       metadata: json['metadata'] != null
           ? Map<String, dynamic>.from(json['metadata'])
@@ -136,8 +141,8 @@ class Transaction {
       paymentMethodId: json['payment_method_id'] is int
           ? json['payment_method_id']
           : (json['payment_method_id'] != null
-                ? int.tryParse('${json['payment_method_id']}')
-                : null),
+              ? int.tryParse('${json['payment_method_id']}')
+              : null),
       subAccountsCommissions: json['sub_accounts_commissions'] != null
           ? List<dynamic>.from(json['sub_accounts_commissions'])
           : null,
@@ -146,13 +151,13 @@ class Transaction {
       accountId: json['account_id'] is int
           ? json['account_id']
           : (json['account_id'] != null
-                ? int.tryParse('${json['account_id']}')
-                : null),
+              ? int.tryParse('${json['account_id']}')
+              : null),
       balanceId: json['balance_id'] is int
           ? json['balance_id']
           : (json['balance_id'] != null
-                ? int.tryParse('${json['balance_id']}')
-                : null),
+              ? int.tryParse('${json['balance_id']}')
+              : null),
       paymentToken: json['payment_token'],
       paymentUrl: json['payment_url'],
       operation: json['operation'],
@@ -245,7 +250,6 @@ class TransactionCreate {
 
     return map;
   }
-
 }
 
 /// DTO used to perform a direct payment using an existing transaction token.

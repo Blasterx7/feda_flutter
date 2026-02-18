@@ -1,6 +1,6 @@
 name: feda_flutter
 description: "A dart package to facilitate payments with fedapay"
-version: 0.2.1
+version: 0.2.2
 homepage: "https://github.com/Blasterx7/feda_flutter"
 
 environment:

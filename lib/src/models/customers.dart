@@ -1,3 +1,4 @@
+/// Represents a FedaPay customer.
 class Customer {
   final int id;
   final String firstname;
@@ -56,6 +57,7 @@ class Customer {
   }
 }
 
+/// Pagination metadata returned by list endpoints.
 class Meta {
   final int currentPage;
   final int? nextPage;

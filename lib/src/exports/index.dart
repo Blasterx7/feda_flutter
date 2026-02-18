@@ -19,3 +19,4 @@ export 'transaction_card.dart';
 export 'transaction_list_view.dart';
 export 'transactions.dart';
 export 'transactions_repository.dart';
+export 'payouts_repository.dart';
