@@ -7,8 +7,17 @@ export default defineNuxtConfig({
     '@nuxt/content',
     'nuxt-og-image',
     'nuxt-llms',
-    '@nuxtjs/mcp-toolkit'
+    '@nuxtjs/mcp-toolkit',
+    '@nuxtjs/sitemap'
   ],
+
+  // Canonical URL — used by nuxt-og-image, sitemap, and useSeoMeta
+  site: {
+    url: 'https://feda-flutter.pages.dev',
+    name: 'feda_flutter',
+    description: 'Official documentation for feda_flutter — a Dart/Flutter package to integrate FedaPay payments.',
+    defaultLocale: 'en'
+  },
 
   devtools: {
     enabled: true
@@ -53,6 +62,12 @@ export default defineNuxtConfig({
 
   icon: {
     provider: 'iconify'
+  },
+
+  // Sitemap config — auto-discovers routes from Nuxt Content
+  sitemap: {
+    strictNuxtContentPaths: true,
+    xsl: false
   },
 
   llms: {

@@ -19,6 +19,7 @@
     "@nuxt/ui": "^4.4.0",
     "@nuxtjs/mcp-toolkit": "^0.7.0",
     "@nuxtjs/mdc": "^0.20.1",
+    "@nuxtjs/sitemap": "^7.6.0",
     "@vueuse/core": "^14.2.1",
     "better-sqlite3": "^12.6.2",
     "minimark": "^0.2.0",

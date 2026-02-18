@@ -34,7 +34,9 @@ useSeoMeta({
 const headline = computed(() => findPageHeadline(navigation?.value, page.value?.path))
 
 defineOgImageComponent('Docs', {
-  headline: headline.value
+  headline: headline.value,
+  title: title || 'feda_flutter',
+  description: description || 'Official documentation for feda_flutter.'
 })
 
 const links = computed(() => {
