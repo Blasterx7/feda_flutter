@@ -21,7 +21,10 @@ useHead({
 useSeoMeta({
   titleTemplate: `%s - ${seo?.siteName}`,
   ogSiteName: seo?.siteName,
-  twitterCard: 'summary_large_image'
+  description: 'Official documentation for feda_flutter — a Dart/Flutter package to integrate FedaPay payments.',
+  ogDescription: 'Official documentation for feda_flutter — a Dart/Flutter package to integrate FedaPay payments.',
+  twitterCard: 'summary_large_image',
+  twitterSite: '@Blasterx7'
 })
 
 provide('navigation', navigation)

@@ -56,12 +56,12 @@ export default defineNuxtConfig({
   },
 
   llms: {
-    domain: 'https://docs-template.nuxt.dev/',
-    title: 'Nuxt Docs Template',
-    description: 'A template for building documentation with Nuxt UI and Nuxt Content.',
+    domain: 'https://feda-flutter.pages.dev/',
+    title: 'feda_flutter Documentation',
+    description: 'Official documentation for feda_flutter — a Dart/Flutter package to integrate FedaPay payments.',
     full: {
-      title: 'Nuxt Docs Template - Full Documentation',
-      description: 'This is the full documentation for the Nuxt Docs Template.'
+      title: 'feda_flutter - Full Documentation',
+      description: 'Complete API reference and guides for feda_flutter.'
     },
     sections: [
       {
@@ -72,16 +72,16 @@ export default defineNuxtConfig({
         ]
       },
       {
-        title: 'Essentials',
+        title: 'API Reference',
         contentCollection: 'docs',
         contentFilters: [
-          { field: 'path', operator: 'LIKE', value: '/essentials%' }
+          { field: 'path', operator: 'LIKE', value: '/api%' }
         ]
       }
     ]
   },
 
   mcp: {
-    name: 'Docs template'
+    name: 'feda_flutter docs'
   }
 })

@@ -16,12 +16,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # Ensure we get the latest commit on the default branch,
+          # not just the tagged commit (which may lag behind main).
+          ref: main
+          fetch-depth: 0
 
       - name: Extract version from tag
         id: version
         run: |
           TAG="${GITHUB_REF_NAME}"
-          # Strip leading 'v' to match CHANGELOG.md format (e.g. v0.1.0 -> 0.1.0)
           VERSION="${TAG#v}"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
@@ -30,20 +34,30 @@ jobs:
         id: notes
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          # Extract the section starting at "## $VERSION" up to (but not including) the next "## " heading
           NOTES=$(awk "/^## ${VERSION}$/{found=1; next} found && /^## /{exit} found{print}" CHANGELOG.md)
           if [ -z "$NOTES" ]; then
             echo "⚠️ No section found for version ${VERSION} in CHANGELOG.md"
             NOTES="See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details."
           fi
-          # Write to a temp file to preserve multi-line content
           echo "$NOTES" > /tmp/release_notes.md
           echo "notes_file=/tmp/release_notes.md" >> "$GITHUB_OUTPUT"
 
-      - name: Create GitHub Release
+      - name: Create or update GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create "${{ steps.version.outputs.tag }}" \
-            --title "${{ steps.version.outputs.tag }}" \
-            --notes-file "${{ steps.notes.outputs.notes_file }}"
+          TAG="${{ steps.version.outputs.tag }}"
+          NOTES_FILE="${{ steps.notes.outputs.notes_file }}"
+
+          # If the release already exists, edit it; otherwise create it.
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            echo "Release $TAG already exists — updating notes."
+            gh release edit "$TAG" \
+              --title "$TAG" \
+              --notes-file "$NOTES_FILE"
+          else
+            echo "Creating release $TAG."
+            gh release create "$TAG" \
+              --title "$TAG" \
+              --notes-file "$NOTES_FILE"
+          fi
