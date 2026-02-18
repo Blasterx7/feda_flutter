@@ -1,3 +1,9 @@
+## 0.2.2
+
+* Added dartdoc comments to all major public API elements (`FedaFlutter`, `ApiEnvironment`, `ApiResponse`, `Transaction`, `Customer`, `Payout`, etc.).
+* Exposed `PayoutsRepository` via `FedaFlutter.instance.payouts` (was missing from the singleton).
+* Added `payouts_repository` to the public exports.
+
 ## 0.2.1
 
 * Added Nuxt-based documentation site in `docs/`.
