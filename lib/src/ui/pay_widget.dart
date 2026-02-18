@@ -39,6 +39,24 @@ class PayWidget extends StatefulWidget {
     'fedapay.com',
   ];
 
+  /// Validates that a host is either an exact match or a proper subdomain
+  /// of an allowed domain. Prevents bypass attacks like 'fedapay.com.evil.com'.
+  /// Note: This allows any subdomain depth (e.g., 'api.checkout.fedapay.com').
+  static bool _isAllowedDomain(String host) {
+    final hostLower = host.toLowerCase();
+    for (final domain in _allowedPaymentDomains) {
+      if (hostLower == domain) {
+        return true;
+      }
+      // Check if it's a proper subdomain (must have a dot before the domain)
+      // This prevents 'fedapay.com.evil.com' but allows 'api.fedapay.com'
+      if (hostLower.endsWith('.$domain')) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   @override
   State<PayWidget> createState() => _PayWidgetState();
 }
@@ -158,9 +176,7 @@ class _PayWidgetState extends State<PayWidget> {
           }
 
           final host = uri.host.toLowerCase();
-          final isAllowedDomain = PayWidget._allowedPaymentDomains.any(
-            (domain) => host == domain || host.endsWith('.$domain'),
-          );
+          final isAllowedDomain = PayWidget._isAllowedDomain(host);
 
           if (!isAllowedDomain) {
             debugPrint(
@@ -205,13 +221,10 @@ class _PayWidgetState extends State<PayWidget> {
             // Validate navigation target against whitelist
             final uri = Uri.tryParse(request.url);
             if (uri != null && uri.host.isNotEmpty) {
-              final host = uri.host.toLowerCase();
-              final isAllowed = PayWidget._allowedPaymentDomains.any(
-                (domain) => host == domain || host.endsWith('.$domain'),
-              );
+              final isAllowed = PayWidget._isAllowedDomain(uri.host);
               
               if (!isAllowed) {
-                debugPrint("Navigation blocked: domain not in whitelist: $host");
+                debugPrint("Navigation blocked: domain not in whitelist: ${uri.host}");
                 return NavigationDecision.prevent;
               }
             }
