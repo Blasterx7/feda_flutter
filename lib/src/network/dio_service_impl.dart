@@ -11,7 +11,11 @@ class DioServiceImpl implements IDioService {
   Dio get client => _dio;
 
   // Hide the api key in the log when in production
-  void _safeLog(String message, String apiKey) {
+  void _safeLog(String message, String? apiKey) {
+    if (apiKey == null || apiKey.isEmpty) {
+      debugPrint(message);
+      return;
+    }
     final maskedKey = apiKey.replaceRange(
       apiKey.length > 8 ? apiKey.length - 8 : 0,
       apiKey.length,
@@ -21,15 +25,17 @@ class DioServiceImpl implements IDioService {
     debugPrint(safeMessage);
   }
 
-  DioServiceImpl(ApiEnvironment environment, String apiKey)
-    : _dio = Dio(
-        BaseOptions(
-          baseUrl: environment.baseUrl,
-          connectTimeout: const Duration(seconds: 20),
-          receiveTimeout: const Duration(seconds: 20),
-          headers: {"Authorization": "Bearer $apiKey"},
-        ),
-      ) {
+  DioServiceImpl(ApiEnvironment environment, String? apiKey)
+      : _dio = Dio(
+          BaseOptions(
+            baseUrl: environment.baseUrl,
+            connectTimeout: const Duration(seconds: 20),
+            receiveTimeout: const Duration(seconds: 20),
+            headers: apiKey != null && apiKey.isNotEmpty
+                ? {"Authorization": "Bearer $apiKey"}
+                : {},
+          ),
+        ) {
     _dio.interceptors.addAll([
       // LogInterceptor(requestBody: true, responseBody: true, error: true),
       LogInterceptor(

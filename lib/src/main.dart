@@ -21,7 +21,8 @@ import 'package:feda_flutter/src/exports/index.dart';
 /// ```
 class FedaFlutter {
   /// The FedaPay API key used to authenticate requests.
-  final String apiKey;
+  /// This is optional if you only use [PayWidget] with a backend-generated token.
+  final String? apiKey;
 
   /// The environment (sandbox or live) this instance targets.
   final ApiEnvironment environment;
@@ -54,7 +55,7 @@ class FedaFlutter {
   /// );
   /// ```
   static void applyConfig({
-    required String apiKey,
+    String? apiKey,
     required ApiEnvironment environment,
   }) {
     _instance = FedaFlutter(apiKey: apiKey, environment: environment);
@@ -72,7 +73,7 @@ class FedaFlutter {
   PayoutsRepository get payouts => PayoutsRepository(_api);
 
   /// Creates a [FedaFlutter] instance. Prefer using [applyConfig] instead.
-  FedaFlutter({required this.apiKey, required this.environment});
+  FedaFlutter({this.apiKey, required this.environment});
 
   /// Initializes the internal HTTP client. Called automatically by [applyConfig].
   void initialize() {
