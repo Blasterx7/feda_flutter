@@ -47,7 +47,7 @@ class _MyHomePageState extends State<MyHomePage> {
   // Use environment variables or secure storage instead.
   // See SECURITY.md for best practices.
   final FedaFlutter _fedaFlutter = FedaFlutter(
-    apiKey: 'sk_live_E0_OnBOeWI8lFG5oSe51Rkke',
+    apiKey: 'sj.....',
     environment: ApiEnvironment.live,
   );
 
