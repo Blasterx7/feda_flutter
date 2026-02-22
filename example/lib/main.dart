@@ -3,6 +3,7 @@ import 'dart:convert';
 // Import the package but hide widget names that are also defined in the
 // example folder to avoid ambiguous imports when using local demo widgets.
 import 'package:app/pages/payment.dart';
+import 'package:app/pages/payment_with_token.dart';
 import 'package:feda_flutter/feda_flutter.dart'
     hide TransactionCard, TransactionListView, CustomerFormWidget;
 import 'widgets/transaction_card.dart';
@@ -42,13 +43,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   // SECURITY WARNING: Never hardcode API keys in production apps!
   // Use environment variables or secure storage instead.
   // See SECURITY.md for best practices.
   final FedaFlutter _fedaFlutter = FedaFlutter(
-    apiKey: 'sk_key_here',
-    environment: ApiEnvironment.sandbox,
+    apiKey: 'sk_live_E0_OnBOeWI8lFG5oSe51Rkke',
+    environment: ApiEnvironment.live,
   );
 
   @override
@@ -56,12 +56,13 @@ class _MyHomePageState extends State<MyHomePage> {
     // TODO: implement initState
     super.initState();
     _fedaFlutter.initialize();
-    
   }
 
   final List<String> _logs = [];
   final TextEditingController _customerIdController = TextEditingController();
   final TextEditingController _transactionIdController =
+      TextEditingController();
+  final TextEditingController _transactionTokenController =
       TextEditingController();
   // Fields for creating a customer
   final TextEditingController _custFirstNameController =
@@ -240,8 +241,6 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  
-
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -284,6 +283,20 @@ class _MyHomePageState extends State<MyHomePage> {
                         keyboardType: TextInputType.number,
                         decoration: const InputDecoration(
                           labelText: 'Transaction ID',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _transactionTokenController,
+                        decoration: const InputDecoration(
+                          labelText:
+                              'Transaction Token (for Frontend-Only PayWidget)',
                         ),
                       ),
                     ),
@@ -357,11 +370,32 @@ class _MyHomePageState extends State<MyHomePage> {
                     ElevatedButton(
                       onPressed: () {
                         // Navigate to payment page
-                        Navigator.of(
-                          context,
-                        ).push(MaterialPageRoute(builder: (ctx) => Payment()));
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (ctx) => const Payment()),
+                        );
                       },
-                      child: const Text('Make payment'),
+                      child: const Text('Make payment (with API Key)'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        final token = _transactionTokenController.text.trim();
+                        if (token.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Please enter a Transaction Token above to test frontend-only integration.',
+                              ),
+                            ),
+                          );
+                          return;
+                        }
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (ctx) => PaymentWithToken(token: token),
+                          ),
+                        );
+                      },
+                      child: const Text('Make payment (Frontend Only)'),
                     ),
                     ElevatedButton(
                       onPressed: _callGetCustomers,
