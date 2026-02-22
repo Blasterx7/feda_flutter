@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://feda-flutter-changelog.pages.dev/sitemap.xml
