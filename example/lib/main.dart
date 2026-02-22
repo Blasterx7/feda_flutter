@@ -43,6 +43,9 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
+  // SECURITY WARNING: Never hardcode API keys in production apps!
+  // Use environment variables or secure storage instead.
+  // See SECURITY.md for best practices.
   final FedaFlutter _fedaFlutter = FedaFlutter(
     apiKey: 'sk_key_here',
     environment: ApiEnvironment.sandbox,

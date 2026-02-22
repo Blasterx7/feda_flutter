@@ -2,6 +2,8 @@
 
 feda_flutter is an open-source Flutter package that provides a client and UI helpers for interacting with the Feda payment API (transactions, customers, payouts, etc.).
 
+📚 **[Documentation](https://feda-flutter.pages.dev/)** • 📝 **[Changelog](https://feda-flutter-changelog.pages.dev/)**
+
 This repository contains:
 - `lib/` — package source (models, repositories, UI widgets)
 - `example/` — example Flutter app demonstrating usage
