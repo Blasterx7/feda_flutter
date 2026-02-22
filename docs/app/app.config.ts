@@ -25,6 +25,13 @@ export default defineAppConfig({
     search: true,
     colorMode: true,
     links: [{
+      label: 'Docs',
+      to: 'https://feda-flutter.pages.dev/',
+    }, {
+      label: 'Changelog',
+      to: 'https://feda-flutter-changelog.pages.dev/',
+      target: '_blank'
+    }, {
       'icon': 'i-simple-icons-github',
       'to': 'https://github.com/Blasterx7/feda_flutter',
       'target': '_blank',
@@ -40,6 +47,13 @@ export default defineAppConfig({
     credits: `feda_flutter • © ${new Date().getFullYear()}`,
     colorMode: false,
     links: [{
+      label: 'Docs',
+      to: 'https://feda-flutter.pages.dev/',
+    }, {
+      label: 'Changelog',
+      to: 'https://feda-flutter-changelog.pages.dev/',
+      target: '_blank'
+    }, {
       'icon': 'i-simple-icons-github',
       'to': 'https://github.com/Blasterx7/feda_flutter',
       'target': '_blank',
