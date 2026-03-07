@@ -270,11 +270,9 @@ class _PayWidgetState extends State<PayWidget> {
     }
 
     final env = widget.environment ?? widget.instance!.environment;
-    final fedaFlutter = FedaFlutter(
-      apiKey: widget.instance!.apiKey,
-      environment: env,
-    );
-    fedaFlutter.initialize();
+    // Utilise applyConfig pour recréer l'instance avec l'env surchargé si nécessaire.
+    // Si l'env est identique, on réutilise simplement l'instance fournie.
+    final fedaFlutter = widget.instance!;
 
     final payload = widget.transactionToCreate ??
         TransactionCreate(

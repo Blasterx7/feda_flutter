@@ -7,16 +7,16 @@ class FakeDioService implements IDioService {
   FakeDioService(this._responses);
 
   @override
-  Future<ApiResponse<dynamic>> get(
+  Future<ApiResponse<T>> get<T>(
     String endpoint, {
     Map<String, dynamic>? query,
   }) async {
     final data = _responses[endpoint];
-    return ApiResponse<dynamic>(data: data, statusCode: 200);
+    return ApiResponse<T>(data: data as T?, statusCode: 200);
   }
 
   @override
-  Future<ApiResponse<dynamic>> post(
+  Future<ApiResponse<T>> post<T>(
     String endpoint, {
     Map<String, dynamic>? data,
   }) async {
@@ -26,30 +26,30 @@ class FakeDioService implements IDioService {
     final resp = _responses.containsKey(endpoint)
         ? _responses[endpoint]
         : (data ?? {});
-    return ApiResponse<dynamic>(data: resp, statusCode: 201);
+    return ApiResponse<T>(data: resp as T?, statusCode: 201);
   }
 
   @override
-  Future<ApiResponse<dynamic>> put(
+  Future<ApiResponse<T>> put<T>(
     String endpoint, {
     Map<String, dynamic>? data,
   }) async {
-    return ApiResponse<dynamic>(data: data, statusCode: 200);
+    return ApiResponse<T>(data: data as T?, statusCode: 200);
   }
 
   @override
-  Future<ApiResponse<dynamic>> patch(
+  Future<ApiResponse<T>> patch<T>(
     String endpoint, {
     Map<String, dynamic>? data,
   }) async {
-    return ApiResponse<dynamic>(data: data, statusCode: 200);
+    return ApiResponse<T>(data: data as T?, statusCode: 200);
   }
 
   @override
-  Future<ApiResponse<dynamic>> delete(
+  Future<ApiResponse<T>> delete<T>(
     String endpoint, {
     Map<String, dynamic>? data,
   }) async {
-    return ApiResponse<dynamic>(data: null, statusCode: 204);
+    return ApiResponse<T>(data: null, statusCode: 204);
   }
 }

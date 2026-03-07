@@ -2,81 +2,122 @@ import 'package:feda_flutter/src/exports/index.dart';
 
 /// The main entry point for the `feda_flutter` SDK.
 ///
-/// Use [applyConfig] once at app startup (typically in `main()`) to
-/// initialize the singleton, then access repositories via [instance].
-///
-/// ## Example
-///
+/// ## Mode Direct (clé API côté client)
 /// ```dart
-/// void main() {
-///   FedaFlutter.applyConfig(
-///     apiKey: 'your_api_key',
-///     environment: ApiEnvironment.sandbox,
-///   );
-///   runApp(const MyApp());
-/// }
+/// FedaFlutter.applyConfig(
+///   apiKey: 'sk_sandbox_...',
+///   environment: ApiEnvironment.sandbox,
+/// );
+/// ```
 ///
-/// // Later, anywhere in your app:
-/// final res = await FedaFlutter.instance.transactions.createTransaction(...);
+/// ## Mode Cloud Proxy (recommandé en production)
+/// La clé FedaPay est stockée de façon sécurisée sur ash-bwallet.
+/// Le SDK n'a besoin que du `projectKey` interne.
+/// ```dart
+/// FedaFlutter.applyCloudConfig(
+///   projectKey: 'proj_abc123',
+///   cloudUrl: 'http://localhost:3000', // URL de votre instance ash-bwallet
+///   environment: ApiEnvironment.sandbox,
+/// );
 /// ```
 class FedaFlutter {
-  /// The FedaPay API key used to authenticate requests.
-  /// This is optional if you only use [PayWidget] with a backend-generated token.
+  /// La clé API FedaPay (mode direct uniquement).
   final String? apiKey;
 
-  /// The environment (sandbox or live) this instance targets.
+  /// La clé publique du projet sur ash-bwallet (mode proxy).
+  final String? projectKey;
+
+  /// L'URL du cloud proxy ash-bwallet (mode proxy).
+  final String? cloudUrl;
+
+  /// L'environnement ciblé (sandbox ou live).
   final ApiEnvironment environment;
+
+  /// Indique si le SDK est en mode Cloud Proxy.
+  bool get isCloudMode => projectKey != null && cloudUrl != null;
 
   late IDioService _api;
 
   static FedaFlutter? _instance;
 
-  /// Returns the initialized [FedaFlutter] singleton.
-  ///
-  /// Throws an [Exception] if [applyConfig] has not been called yet.
+  /// Retourne le singleton initialisé.
+  /// Lance une [Exception] si [applyConfig] ou [applyCloudConfig] n'a pas été appelé.
   static FedaFlutter get instance {
     if (_instance == null) {
       throw Exception(
-        "FedaFlutter is not initialized. Please call FedaFlutter.applyConfig() first.",
+        "FedaFlutter is not initialized. Please call FedaFlutter.applyConfig() "
+        "or FedaFlutter.applyCloudConfig() first.",
       );
     }
     return _instance!;
   }
 
-  /// Initializes the [FedaFlutter] singleton with the given [apiKey] and
-  /// [environment].
+  /// Mode Direct — la clé API FedaPay est passée directement (moins sécurisé).
   ///
-  /// Call this once in `main()` before using any repository.
-  ///
-  /// ```dart
-  /// FedaFlutter.applyConfig(
-  ///   apiKey: 'sk_sandbox_...',
-  ///   environment: ApiEnvironment.sandbox,
-  /// );
-  /// ```
+  /// ⚠️  Éviter en production mobile : la clé peut être extraite du binaire.
+  /// Préférez [applyCloudConfig] pour la production.
   static void applyConfig({
     String? apiKey,
     required ApiEnvironment environment,
   }) {
-    _instance = FedaFlutter(apiKey: apiKey, environment: environment);
-    _instance!.initialize();
+    _instance = FedaFlutter._(
+      apiKey: apiKey,
+      environment: environment,
+    );
+    _instance!._initialize();
   }
 
-  /// Provides access to the [CustomersRepository] for managing FedaPay customers.
+  /// Mode Cloud Proxy — la clé FedaPay est stockée sur ash-bwallet.
+  ///
+  /// Le SDK envoie uniquement le [projectKey] interne ; ash-bwallet
+  /// résout la clé FedaPay réelle côté serveur.
+  ///
+  /// ```dart
+  /// FedaFlutter.applyCloudConfig(
+  ///   projectKey: 'proj_abc123',
+  ///   cloudUrl: 'http://localhost:3000', // URL de votre instance ash-bwallet
+  ///   environment: ApiEnvironment.sandbox,
+  /// );
+  /// ```
+  static void applyCloudConfig({
+    required String projectKey,
+    required String cloudUrl,
+    ApiEnvironment environment = ApiEnvironment.sandbox,
+  }) {
+    _instance = FedaFlutter._(
+      projectKey: projectKey,
+      cloudUrl: cloudUrl,
+      environment: environment,
+    );
+    _instance!._initialize();
+  }
+
+  /// Accès au repository Customers.
   CustomersRepository get customers => CustomersRepository(_api);
 
-  /// Provides access to the [TransactionsRepository] for creating and managing
-  /// FedaPay transactions.
+  /// Accès au repository Transactions.
   TransactionsRepository get transactions => TransactionsRepository(_api);
 
-  /// Provides access to the [PayoutsRepository] for managing FedaPay payouts.
+  /// Accès au repository Payouts.
   PayoutsRepository get payouts => PayoutsRepository(_api);
 
-  /// Creates a [FedaFlutter] instance. Prefer using [applyConfig] instead.
-  FedaFlutter({this.apiKey, required this.environment});
+  FedaFlutter._({
+    this.apiKey,
+    this.projectKey,
+    this.cloudUrl,
+    required this.environment,
+  });
 
-  /// Initializes the internal HTTP client. Called automatically by [applyConfig].
-  void initialize() {
-    _api = DioServiceImpl(environment, apiKey);
+  void _initialize() {
+    if (isCloudMode) {
+      _api = DioServiceImpl.cloudProxy(
+        cloudUrl: cloudUrl!,
+        projectKey: projectKey!,
+        environment: environment,
+      );
+    } else {
+      _api = DioServiceImpl(environment, apiKey);
+    }
   }
 }
+

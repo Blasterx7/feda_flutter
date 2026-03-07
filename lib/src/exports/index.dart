@@ -20,3 +20,6 @@ export 'transaction_list_view.dart';
 export 'transactions.dart';
 export 'transactions_repository.dart';
 export 'payouts_repository.dart';
+// Cloud Proxy extensions
+export 'package:feda_flutter/src/ui/widgets/payment_bottom_sheet.dart';
+export 'package:feda_flutter/src/ui/widgets/sandbox_simulator.dart';

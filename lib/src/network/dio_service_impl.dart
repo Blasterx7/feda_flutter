@@ -10,21 +10,20 @@ class DioServiceImpl implements IDioService {
 
   Dio get client => _dio;
 
-  // Hide the api key in the log when in production
-  void _safeLog(String message, String? apiKey) {
-    if (apiKey == null || apiKey.isEmpty) {
+  void _safeLog(String message, String? secret) {
+    if (secret == null || secret.isEmpty) {
       debugPrint(message);
       return;
     }
-    final maskedKey = apiKey.replaceRange(
-      apiKey.length > 8 ? apiKey.length - 8 : 0,
-      apiKey.length,
+    final maskedKey = secret.replaceRange(
+      secret.length > 8 ? secret.length - 8 : 0,
+      secret.length,
       '********',
     );
-    final safeMessage = message.replaceAll(apiKey, maskedKey);
-    debugPrint(safeMessage);
+    debugPrint(message.replaceAll(secret, maskedKey));
   }
 
+  /// Mode Direct — utilise une clé API FedaPay directement.
   DioServiceImpl(ApiEnvironment environment, String? apiKey)
       : _dio = Dio(
           BaseOptions(
@@ -36,25 +35,49 @@ class DioServiceImpl implements IDioService {
                 : {},
           ),
         ) {
+    _addInterceptors(apiKey);
+  }
+
+  /// Mode Cloud Proxy — toutes les requêtes passent par ash-bwallet.
+  ///
+  /// Le SDK injecte automatiquement :
+  /// - `x-feda-project-key` : identifie le projet (ash-bwallet résout la clé FedaPay)
+  /// - `x-feda-env` : 'sandbox' ou 'live'
+  ///
+  /// Aucune clé FedaPay n'est exposée côté client.
+  DioServiceImpl.cloudProxy({
+    required String cloudUrl,
+    required String projectKey,
+    required ApiEnvironment environment,
+  }) : _dio = Dio(
+          BaseOptions(
+            baseUrl: cloudUrl,
+            connectTimeout: const Duration(seconds: 20),
+            receiveTimeout: const Duration(seconds: 20),
+            headers: {
+              'x-feda-project-key': projectKey,
+              'x-feda-env': environment == ApiEnvironment.live ? 'live' : 'sandbox',
+            },
+          ),
+        ) {
+    _addInterceptors(null);
+  }
+
+  void _addInterceptors(String? secretToMask) {
     _dio.interceptors.addAll([
-      // LogInterceptor(requestBody: true, responseBody: true, error: true),
       LogInterceptor(
         requestBody: true,
         responseBody: true,
         requestHeader: false,
         responseHeader: false,
-        logPrint: (obj) => _safeLog(obj.toString(), apiKey),
+        logPrint: (obj) => _safeLog(obj.toString(), secretToMask),
       ),
-
       InterceptorsWrapper(
         onRequest: (options, handler) {
-          options.headers['X-App-Version'] = '1.0.0';
+          options.headers['X-App-Version'] = '2.0.0';
           return handler.next(options);
         },
-        onResponse: (response, handler) {
-          // Exemple : traitement global des réponses
-          return handler.next(response);
-        },
+        onResponse: (response, handler) => handler.next(response),
         onError: (DioException e, handler) {
           handler.reject(
             DioException(
@@ -69,63 +92,64 @@ class DioServiceImpl implements IDioService {
     ]);
   }
 
+
   @override
-  Future<ApiResponse> get(
+  Future<ApiResponse<T>> get<T>(
     String endpoint, {
     Map<String, dynamic>? query,
   }) async {
     try {
       final res = await _dio.get(endpoint, queryParameters: query);
-      return ApiResponse<dynamic>(data: res.data, statusCode: res.statusCode);
+      return ApiResponse<T>(data: res.data as T?, statusCode: res.statusCode);
     } catch (e) {
       throw _handleError(e);
     }
   }
 
   @override
-  Future<ApiResponse> post(
+  Future<ApiResponse<T>> post<T>(
     String endpoint, {
     Map<String, dynamic>? data,
   }) async {
     try {
       final res = await _dio.post(endpoint, data: data);
-      return ApiResponse<dynamic>(data: res.data, statusCode: res.statusCode);
+      return ApiResponse<T>(data: res.data as T?, statusCode: res.statusCode);
     } catch (e) {
       throw _handleError(e);
     }
   }
 
   @override
-  Future<ApiResponse> put(String endpoint, {Map<String, dynamic>? data}) async {
+  Future<ApiResponse<T>> put<T>(String endpoint, {Map<String, dynamic>? data}) async {
     try {
       final res = await _dio.put(endpoint, data: data);
-      return ApiResponse<dynamic>(data: res.data, statusCode: res.statusCode);
+      return ApiResponse<T>(data: res.data as T?, statusCode: res.statusCode);
     } catch (e) {
       throw _handleError(e);
     }
   }
 
   @override
-  Future<ApiResponse> patch(
+  Future<ApiResponse<T>> patch<T>(
     String endpoint, {
     Map<String, dynamic>? data,
   }) async {
     try {
       final res = await _dio.patch(endpoint, data: data);
-      return ApiResponse<dynamic>(data: res.data, statusCode: res.statusCode);
+      return ApiResponse<T>(data: res.data as T?, statusCode: res.statusCode);
     } catch (e) {
       throw _handleError(e);
     }
   }
 
   @override
-  Future<ApiResponse> delete(
+  Future<ApiResponse<T>> delete<T>(
     String endpoint, {
     Map<String, dynamic>? data,
   }) async {
     try {
       final res = await _dio.delete(endpoint, data: data);
-      return ApiResponse<dynamic>(data: res.data, statusCode: res.statusCode);
+      return ApiResponse<T>(data: res.data as T?, statusCode: res.statusCode);
     } catch (e) {
       throw _handleError(e);
     }

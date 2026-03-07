@@ -111,7 +111,7 @@ class CustomerCollection {
   /// - a List of customer maps
   /// - a Map with a key containing 'customer' that maps to a List and an
   ///   optional 'meta' map
-  factory CustomerCollection.fromApi(dynamic payload) {
+  factory CustomerCollection.fromApi(Object? payload) {
     if (payload is List) {
       final list = payload
           .map((e) => Customer.fromJson(Map<String, dynamic>.from(e)))
@@ -144,8 +144,8 @@ class CustomerCollection {
 
       final customers = <Customer>[];
       if (listValue != null) {
-        final lv = listValue;
-        for (final item in lv!) {
+        final lv = listValue as List<dynamic>;
+        for (final item in lv) {
           if (item is Map) {
             customers.add(Customer.fromJson(Map<String, dynamic>.from(item)));
           }

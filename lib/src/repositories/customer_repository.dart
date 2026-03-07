@@ -11,7 +11,7 @@ class CustomersRepository extends BaseRepository {
   /// Lister tous les customers
   Future<ApiResponse<List<Customer>>> getCustomers() async {
     return safeCall(() async {
-      final res = await client.get(CUSTOMERS_BASE_PATH);
+      final res = await client.get<Map<String, dynamic>>(CUSTOMERS_BASE_PATH);
       // Let CustomerCollection handle wrapped shapes like {"v1/customers": [...], "meta": {...}}
       final collection = CustomerCollection.fromApi(res.data);
       final data = collection.customers;
@@ -26,9 +26,9 @@ class CustomersRepository extends BaseRepository {
   /// Récupérer un customer par id
   Future<ApiResponse<Customer>> getCustomer(int id) async {
     return safeCall(() async {
-      final res = await client.get("$CUSTOMERS_BASE_PATH/$id");
-      final raw = normalizeApiData(res.data);
-      final customer = Customer.fromJson(raw);
+      final res = await client.get<Map<String, dynamic>>("$CUSTOMERS_BASE_PATH/$id");
+      final raw = normalizeApiData(res.data) as Map<String, dynamic>?;
+      final customer = Customer.fromJson(raw ?? {});
       return ApiResponse<Customer>(data: customer, statusCode: res.statusCode);
     });
   }
@@ -38,13 +38,13 @@ class CustomersRepository extends BaseRepository {
   /// Accepts either a [CustomerCreate] DTO or a raw `Map<String, dynamic>`
   /// payload. If passed a DTO it will be converted to the API shape
   /// (nested `phone_number`).
-  Future<ApiResponse<Customer>> createCustomer(dynamic data) async {
+  Future<ApiResponse<Customer>> createCustomer(Object data) async {
     return safeCall(() async {
       final payload =
           data is CustomerCreate ? data.toJson() : data as Map<String, dynamic>;
-      final res = await client.post(CUSTOMERS_BASE_PATH, data: payload);
-      final raw = normalizeApiData(res.data);
-      final customer = Customer.fromJson(raw);
+      final res = await client.post<Map<String, dynamic>>(CUSTOMERS_BASE_PATH, data: payload);
+      final raw = normalizeApiData(res.data) as Map<String, dynamic>?;
+      final customer = Customer.fromJson(raw ?? {});
       return ApiResponse<Customer>(data: customer, statusCode: res.statusCode);
     });
   }
@@ -54,21 +54,22 @@ class CustomersRepository extends BaseRepository {
   /// Accepts either a [CustomerCreate] DTO or a raw `Map<String, dynamic>`
   /// payload. If passed a DTO it will be converted to the API shape
   /// (nested `phone_number`).
-  Future<ApiResponse<Customer>> updateCustomer(int id, dynamic data) async {
+  Future<ApiResponse<Customer>> updateCustomer(int id, Object data) async {
     return safeCall(() async {
       final payload =
           data is CustomerCreate ? data.toJson() : data as Map<String, dynamic>;
-      final res = await client.put('$CUSTOMERS_BASE_PATH/$id', data: payload);
-      final raw = normalizeApiData(res.data);
-      final customer = Customer.fromJson(raw);
+      final res = await client.put<Map<String, dynamic>>('$CUSTOMERS_BASE_PATH/$id', data: payload);
+      final raw = normalizeApiData(res.data) as Map<String, dynamic>?;
+      final customer = Customer.fromJson(raw ?? {});
       return ApiResponse<Customer>(data: customer, statusCode: res.statusCode);
     });
   }
 
   /// Supprimer un customer
-  Future<ApiResponse<dynamic>> deleteCustomer(int id) async {
+  Future<ApiResponse<void>> deleteCustomer(int id) async {
     return safeCall(() async {
-      return await client.delete("$CUSTOMERS_BASE_PATH/$id");
+      final res = await client.delete<void>("$CUSTOMERS_BASE_PATH/$id");
+      return ApiResponse<void>(data: null, statusCode: res.statusCode);
     });
   }
 }

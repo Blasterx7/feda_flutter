@@ -15,7 +15,7 @@ class TransactionsRepository extends BaseRepository {
       // Build the search path safely (handles whether TRANSACTIONS_BASE_PATH
       // contains a trailing slash or not).
       final path = joinPath(TRANSACTIONS_BASE_PATH, 'search');
-      final res = await client.get(path);
+      final res = await client.get<Map<String, dynamic>>(path);
       // Use TransactionCollection to handle wrapped responses that include
       // a list under a key like "v1/transactions" and optional meta.
       final collection = TransactionCollection.fromApi(res.data);
@@ -32,9 +32,9 @@ class TransactionsRepository extends BaseRepository {
   /// Récupérer une transaction par id
   Future<ApiResponse<Transaction>> getTransaction(int id) async {
     return safeCall(() async {
-      final res = await client.get("$TRANSACTIONS_BASE_PATH/$id");
-      final raw = normalizeApiData(res.data);
-      final transaction = Transaction.fromJson(raw);
+      final res = await client.get<Map<String, dynamic>>("$TRANSACTIONS_BASE_PATH/$id");
+      final raw = normalizeApiData(res.data) as Map<String, dynamic>?;
+      final transaction = Transaction.fromJson(raw ?? {});
       return ApiResponse<Transaction>(
         data: transaction,
         statusCode: res.statusCode,
@@ -47,9 +47,9 @@ class TransactionsRepository extends BaseRepository {
   Future<ApiResponse<TransactionToken>> getTransactionToken(int id) async {
     return safeCall(() async {
       final path = joinPath(TRANSACTIONS_BASE_PATH, '$id/token');
-      final res = await client.get(path);
-      final raw = normalizeApiData(res.data);
-      final token = TransactionToken.fromJson(raw);
+      final res = await client.get<Map<String, dynamic>>(path);
+      final raw = normalizeApiData(res.data) as Map<String, dynamic>?;
+      final token = TransactionToken.fromJson(raw ?? {});
       return ApiResponse<TransactionToken>(
         data: token,
         statusCode: res.statusCode,
@@ -61,14 +61,14 @@ class TransactionsRepository extends BaseRepository {
   ///
   /// Accepts either a [TransactionCreate] DTO or a raw `Map<String, dynamic>`
   /// payload. If passed a DTO it will be converted to the API shape.
-  Future<ApiResponse<Transaction>> createTransaction(dynamic data) async {
+  Future<ApiResponse<Transaction>> createTransaction(Object data) async {
     return safeCall(() async {
       final payload = data is TransactionCreate
           ? data.toJson()
           : data as Map<String, dynamic>;
-      final res = await client.post(TRANSACTIONS_BASE_PATH, data: payload);
-      final raw = normalizeApiData(res.data);
-      final transaction = Transaction.fromJson(raw);
+      final res = await client.post<Map<String, dynamic>>(TRANSACTIONS_BASE_PATH, data: payload);
+      final raw = normalizeApiData(res.data) as Map<String, dynamic>?;
+      final transaction = Transaction.fromJson(raw ?? {});
       return ApiResponse<Transaction>(
         data: transaction,
         statusCode: res.statusCode,
@@ -105,9 +105,9 @@ class TransactionsRepository extends BaseRepository {
           : data as Map<String, dynamic>;
 
       final path = '$TRANSACTIONS_BASE_PATH?mode=$mode';
-      final res = await client.post(path, data: payload);
-      final raw = normalizeApiData(res.data);
-      final transaction = Transaction.fromJson(raw);
+      final res = await client.post<Map<String, dynamic>>(path, data: payload);
+      final raw = normalizeApiData(res.data) as Map<String, dynamic>?;
+      final transaction = Transaction.fromJson(raw ?? {});
       return ApiResponse<Transaction>(
         data: transaction,
         statusCode: res.statusCode,
@@ -121,18 +121,18 @@ class TransactionsRepository extends BaseRepository {
   /// payload.
   Future<ApiResponse<Transaction>> updateTransaction(
     int id,
-    dynamic data,
+    Object data,
   ) async {
     return safeCall(() async {
       final payload = data is TransactionCreate
           ? data.toJson()
           : data as Map<String, dynamic>;
-      final res = await client.put(
+      final res = await client.put<Map<String, dynamic>>(
         '$TRANSACTIONS_BASE_PATH/$id',
         data: payload,
       );
-      final raw = normalizeApiData(res.data);
-      final transaction = Transaction.fromJson(raw);
+      final raw = normalizeApiData(res.data) as Map<String, dynamic>?;
+      final transaction = Transaction.fromJson(raw ?? {});
       return ApiResponse<Transaction>(
         data: transaction,
         statusCode: res.statusCode,
@@ -141,9 +141,13 @@ class TransactionsRepository extends BaseRepository {
   }
 
   /// Supprimer une transaction
-  Future<ApiResponse<dynamic>> deleteTransaction(int id) async {
+  Future<ApiResponse<void>> deleteTransaction(int id) async {
     return safeCall(() async {
-      return await client.delete("$TRANSACTIONS_BASE_PATH/$id");
+      final res = await client.delete<void>("$TRANSACTIONS_BASE_PATH/$id");
+      return ApiResponse<void>(
+        data: null,
+        statusCode: res.statusCode,
+      );
     });
   }
 }

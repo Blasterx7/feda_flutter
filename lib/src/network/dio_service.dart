@@ -1,23 +1,23 @@
 import 'package:feda_flutter/src/core/models/api_response.dart';
 
 abstract class IDioService {
-  Future<ApiResponse<dynamic>> get(
+  Future<ApiResponse<T>> get<T>(
     String endpoint, {
     Map<String, dynamic>? query,
   });
-  Future<ApiResponse<dynamic>> post(
+  Future<ApiResponse<T>> post<T>(
     String endpoint, {
     Map<String, dynamic>? data,
   });
-  Future<ApiResponse<dynamic>> put(
+  Future<ApiResponse<T>> put<T>(
     String endpoint, {
     Map<String, dynamic>? data,
   });
-  Future<ApiResponse<dynamic>> patch(
+  Future<ApiResponse<T>> patch<T>(
     String endpoint, {
     Map<String, dynamic>? data,
   });
-  Future<ApiResponse<dynamic>> delete(
+  Future<ApiResponse<T>> delete<T>(
     String endpoint, {
     Map<String, dynamic>? data,
   });

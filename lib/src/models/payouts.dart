@@ -175,7 +175,7 @@ class PayoutCollection {
 
   PayoutCollection({required this.payouts, this.meta});
 
-  factory PayoutCollection.fromApi(dynamic payload) {
+  factory PayoutCollection.fromApi(Object? payload) {
     if (payload is List) {
       final list = payload
           .map((e) => Payout.fromJson(Map<String, dynamic>.from(e)))
@@ -206,7 +206,8 @@ class PayoutCollection {
 
       final payouts = <Payout>[];
       if (listValue != null) {
-        for (final item in listValue!) {
+        final lv = listValue as List<dynamic>;
+        for (final item in lv) {
           if (item is Map) {
             payouts.add(Payout.fromJson(Map<String, dynamic>.from(item)));
           }

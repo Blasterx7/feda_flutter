@@ -10,7 +10,7 @@ class PayoutsRepository extends BaseRepository {
   Future<ApiResponse<List<Payout>>> getPayouts() async {
     return safeCall(() async {
       final path = joinPath(PAYOUTS_BASE_PATH, 'search');
-      final res = await client.get(path);
+      final res = await client.get<Map<String, dynamic>>(path);
       final collection = PayoutCollection.fromApi(res.data);
       return ApiResponse<List<Payout>>(
           data: collection.payouts,
@@ -22,41 +22,42 @@ class PayoutsRepository extends BaseRepository {
   /// Get a single payout by id
   Future<ApiResponse<Payout>> getPayout(int id) async {
     return safeCall(() async {
-      final res = await client.get('$PAYOUTS_BASE_PATH/$id');
-      final raw = normalizeApiData(res.data);
-      final payout = Payout.fromJson(raw);
+      final res = await client.get<Map<String, dynamic>>('$PAYOUTS_BASE_PATH/$id');
+      final raw = normalizeApiData(res.data) as Map<String, dynamic>?;
+      final payout = Payout.fromJson(raw ?? {});
       return ApiResponse<Payout>(data: payout, statusCode: res.statusCode);
     });
   }
 
   /// Create a payout
-  Future<ApiResponse<Payout>> createPayout(dynamic data) async {
+  Future<ApiResponse<Payout>> createPayout(Object data) async {
     return safeCall(() async {
       final payload =
           data is PayoutCreate ? data.toJson() : data as Map<String, dynamic>;
-      final res = await client.post(PAYOUTS_BASE_PATH, data: payload);
-      final raw = normalizeApiData(res.data);
-      final payout = Payout.fromJson(raw);
+      final res = await client.post<Map<String, dynamic>>(PAYOUTS_BASE_PATH, data: payload);
+      final raw = normalizeApiData(res.data) as Map<String, dynamic>?;
+      final payout = Payout.fromJson(raw ?? {});
       return ApiResponse<Payout>(data: payout, statusCode: res.statusCode);
     });
   }
 
   /// Update a payout
-  Future<ApiResponse<Payout>> updatePayout(int id, dynamic data) async {
+  Future<ApiResponse<Payout>> updatePayout(int id, Object data) async {
     return safeCall(() async {
       final payload =
           data is PayoutCreate ? data.toJson() : data as Map<String, dynamic>;
-      final res = await client.put('$PAYOUTS_BASE_PATH/$id', data: payload);
-      final raw = normalizeApiData(res.data);
-      final payout = Payout.fromJson(raw);
+      final res = await client.put<Map<String, dynamic>>('$PAYOUTS_BASE_PATH/$id', data: payload);
+      final raw = normalizeApiData(res.data) as Map<String, dynamic>?;
+      final payout = Payout.fromJson(raw ?? {});
       return ApiResponse<Payout>(data: payout, statusCode: res.statusCode);
     });
   }
 
   /// Delete a payout
-  Future<ApiResponse<dynamic>> deletePayout(int id) async {
+  Future<ApiResponse<void>> deletePayout(int id) async {
     return safeCall(() async {
-      return await client.delete('$PAYOUTS_BASE_PATH/$id');
+      final res = await client.delete<void>('$PAYOUTS_BASE_PATH/$id');
+      return ApiResponse<void>(data: null, statusCode: res.statusCode);
     });
   }
 }

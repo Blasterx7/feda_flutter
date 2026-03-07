@@ -16,20 +16,10 @@ abstract class BaseRepository {
 
   /// Safe call wrapper for repository actions.
   ///
-  /// Accepts an action that may return either a raw value `T` or an
-  /// `ApiResponse<T>`. If the action returns a raw `T`, it will be wrapped
-  /// into an `ApiResponse<T>` with a null `statusCode`. If the action
-  /// already returns `ApiResponse<T>`, it will be returned as-is.
-  Future<ApiResponse<T>> safeCall<T>(Future<dynamic> Function() action) async {
+  /// Accepts an action that returns an `ApiResponse<T>`.
+  Future<ApiResponse<T>> safeCall<T>(Future<ApiResponse<T>> Function() action) async {
     try {
-      final result = await action();
-
-      if (result is ApiResponse<T>) {
-        return result;
-      }
-
-      // Wrap raw result into ApiResponse<T>
-      return ApiResponse<T>(data: result as T?, statusCode: null);
+      return await action();
     } catch (e) {
       debugPrint("BaseRepository: safeCall error: ${e.toString()}");
       throw _handleError(e);
@@ -41,7 +31,7 @@ abstract class BaseRepository {
   /// or {"v1/customer": {...}}. This helper unwraps a single-key map to its
   /// inner value so repositories can handle both wrapped and unwrapped shapes.
   @protected
-  dynamic normalizeApiData(dynamic data) {
+  Object? normalizeApiData(Object? data) {
     if (data is Map && data.length == 1) {
       final key = data.keys.first.toString();
       // Only unwrap if the key explicitly looks like a wrapper namespace.

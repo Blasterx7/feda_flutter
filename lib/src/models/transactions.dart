@@ -49,7 +49,7 @@ class Transaction {
   final num? amountDebited;
   final String? receiptUrl;
   final int? paymentMethodId;
-  final List<dynamic>? subAccountsCommissions;
+  final List<Map<String, dynamic>>? subAccountsCommissions;
   final String? transactionKey;
   final String? merchantReference;
   final int? accountId;
@@ -144,7 +144,9 @@ class Transaction {
               ? int.tryParse('${json['payment_method_id']}')
               : null),
       subAccountsCommissions: json['sub_accounts_commissions'] != null
-          ? List<dynamic>.from(json['sub_accounts_commissions'])
+          ? (json['sub_accounts_commissions'] as List<dynamic>)
+              .map((e) => Map<String, dynamic>.from(e as Map))
+              .toList()
           : null,
       transactionKey: json['transaction_key'],
       merchantReference: json['merchant_reference'],
@@ -302,7 +304,7 @@ class TransactionCollection {
 
   TransactionCollection({required this.transactions, this.meta});
 
-  factory TransactionCollection.fromApi(dynamic payload) {
+  factory TransactionCollection.fromApi(Object? payload) {
     if (payload is List) {
       final list = payload
           .map((e) => Transaction.fromJson(Map<String, dynamic>.from(e)))
@@ -333,7 +335,8 @@ class TransactionCollection {
 
       final transactions = <Transaction>[];
       if (listValue != null) {
-        for (final item in listValue!) {
+        final lv = listValue as List<dynamic>;
+        for (final item in lv) {
           if (item is Map) {
             transactions.add(
               Transaction.fromJson(Map<String, dynamic>.from(item)),
