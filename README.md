@@ -21,7 +21,14 @@ Then initialize and use the client in your app:
 
 ```dart
 // 1. Initialize globally (e.g. in main.dart)
-FedaFlutter.applyConfig(apiKey: 'sk_sandbox_xxx', environment: ApiEnvironment.sandbox);
+// Recommended for Production (Cloud Proxy):
+FedaFlutter.applyCloudConfig(
+  projectKey: 'pk_...', 
+  cloudUrl: 'https://your-cloud-proxy.com'
+);
+
+// OR Legacy/Prototyping (Direct API):
+// FedaFlutter.applyConfig(apiKey: 'sk_...', environment: ApiEnvironment.sandbox);
 
 // 2. Use anywhere in your app
 final res = await FedaFlutter.instance.transactions.createTransaction(payload);
@@ -121,19 +128,43 @@ final res = await FedaFlutter.instance.transactions.createTransaction(payload);
 
 See `example/` for full runnable demos.
 
-## Usage
+## 🚀 Migration & Security
 
-The `example/` app demonstrates common usage patterns. Below is a condensed
-and annotated snippet based on `example/lib/main.dart` showing how to
-initialize the SDK, call repositories, create customers/transactions and
-obtain a transaction token.
+The `feda_flutter` SDK is evolving towards a more secure, backend-first architecture. 
+
+### From `initialize()` to `applyConfig()`
+
+The old `FedaFlutter.initialize()` is deprecated. Please use:
+- **`applyConfig()`**: For direct API key usage (Sandbox or Prototyping).
+- **`applyCloudConfig()`**: **(Recommended)** For production, using a Cloud Proxy (like `feda-cloud`) to avoid exposing secret keys in the mobile binary.
+
+### Initialization Modes
+
+#### 1. Cloud Proxy Mode (Recommended)
+This mode ensures your secret API keys never leave your server.
 
 ```dart
-// 1) Initialize once (e.g. in main)
+FedaFlutter.applyCloudConfig(
+  projectKey: 'your_public_project_key',
+  cloudUrl: 'https://your-feda-cloud-instance.com',
+);
+```
+
+#### 2. Direct API Mode (Legacy & Testing)
+Use this only for internal apps or quick prototypes.
+
+```dart
 FedaFlutter.applyConfig(
-  apiKey: 'sk_sandbox_xxx', // use a sandbox or a short-lived token in prod
+  apiKey: 'sk_sandbox_...',
   environment: ApiEnvironment.sandbox,
 );
+```
+
+---
+
+## Usage
+
+The `example/` app demonstrates common usage patterns.
 
 // 2) Read lists or single resources using the singleton instance
 final customersRes = await FedaFlutter.instance.customers.getCustomers();
