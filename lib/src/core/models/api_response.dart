@@ -22,6 +22,9 @@ class ApiResponse<T> {
   /// wrapper and keep it lightweight.
   final Map<String, dynamic>? meta;
 
+  /// Returns `true` if the request was successful (HTTP 200-299).
+  bool get isSuccessful => statusCode != null && statusCode! >= 200 && statusCode! < 300;
+
   /// Creates an [ApiResponse] with the given [data], [statusCode] and [meta].
   ApiResponse({this.data, this.statusCode, this.meta});
 }

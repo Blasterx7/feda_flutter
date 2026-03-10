@@ -46,16 +46,16 @@ class _MyHomePageState extends State<MyHomePage> {
   // SECURITY WARNING: Never hardcode API keys in production apps!
   // Use environment variables or secure storage instead.
   // See SECURITY.md for best practices.
-  final FedaFlutter _fedaFlutter = FedaFlutter(
-    apiKey: 'sj.....',
-    environment: ApiEnvironment.live,
-  );
+  // No longer a field, we will use a getter to FedaFlutter.instance
+  FedaFlutter get _fedaFlutter => FedaFlutter.instance;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    _fedaFlutter.initialize();
+    FedaFlutter.applyConfig(
+      apiKey: 'sj.....', // TODO: Use your real key
+      environment: ApiEnvironment.live,
+    );
   }
 
   final List<String> _logs = [];
@@ -585,7 +585,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Positioned.fill(
               child: Container(
                 // ignore: deprecated_member_use
-                color: Colors.black.withOpacity(0.35),
+                color: Colors.black.withValues(alpha: 0.35),
                 child: const Center(child: CircularProgressIndicator()),
               ),
             ),

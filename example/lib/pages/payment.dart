@@ -17,16 +17,16 @@ class _PaymentState extends State<Payment> {
     currency: CurrencyIso(iso: 'XOF'),
   );
 
-  final FedaFlutter _fedaFlutter = FedaFlutter(
-    apiKey: 'sk_key_here',
-    environment: ApiEnvironment.sandbox,
-  );
+  // No longer needed as a field, we will use the singleton
+
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    _fedaFlutter.initialize();
+    FedaFlutter.applyConfig(
+      apiKey: 'sk_key_here',
+      environment: ApiEnvironment.sandbox,
+    );
   }
 
   @override
@@ -40,7 +40,7 @@ class _PaymentState extends State<Payment> {
         onPaymentSuccess: () => Navigator.of(
           context,
         ).push(MaterialPageRoute(builder: (ctx) => const SuccessPay())),
-        instance: _fedaFlutter,
+        instance: FedaFlutter.instance,
       ),
     );
   }
