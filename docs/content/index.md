@@ -121,6 +121,6 @@ Everything you need for FedaPay
   Singleton Pattern
 
   #description
-  Initialize once with `FedaFlutter.initialize()` and access your repositories anywhere in the app.
+  Initialize once with `FedaFlutter.applyConfig()` or `FedaFlutter.applyCloudConfig()` and access your repositories anywhere in the app.
   :::
 ::
