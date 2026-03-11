@@ -91,7 +91,7 @@ bootstrap integration in real apps.
 - Typed repositories: `TransactionsRepository`, `CustomersRepository`,
   `PayoutsRepository` with ApiResponse<T> results and robust JSON parsing.
 - **One-line payment integration**: A simplified `PayWidget` that handles the entire flow (creation + UI) with minimal code.
-- **Cross-platform support**: Works seamlessly on Mobile (Android/iOS via WebView) and Web/Desktop (via secure browser redirect).
+- **Cross-platform support**: Works seamlessly on Mobile (Android/iOS via WebView) and Web/Desktop (via secure browser redirect with automatic status polling).
 - Example apps: a Flutter e‑commerce example and a Dart Frog backend example
   (see `example/`).
 - Null-safety and modern Dart patterns; small, dependency-light core.

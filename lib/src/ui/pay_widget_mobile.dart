@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:feda_flutter/src/exports/index.dart';
 import 'package:flutter/material.dart';
@@ -59,8 +60,11 @@ class PayWidget extends StatefulWidget {
 
 class _PayWidgetState extends State<PayWidget> {
   bool _isLoading = false;
+  bool _isPolling = false;
   WebViewController? _controller;
   String? _currentPaymentUrl;
+  int? _transactionId;
+  Timer? _pollingTimer;
 
   @override
   void initState() {
@@ -100,8 +104,19 @@ class _PayWidgetState extends State<PayWidget> {
     _startPayment();
   }
 
+  @override
+  void dispose() {
+    _pollingTimer?.cancel();
+    super.dispose();
+  }
+
   Future<void> _startPayment() async {
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _isPolling = false;
+    });
+    _pollingTimer?.cancel();
+
     try {
       String? url;
       if (widget.transactionToken != null && widget.transactionToken!.isNotEmpty) {
@@ -118,6 +133,7 @@ class _PayWidgetState extends State<PayWidget> {
             );
         final res = await widget.instance!.transactions.createTransaction(payload);
         if (res.isSuccessful && res.data != null) {
+          _transactionId = res.data!.id;
           url = res.data!.paymentUrl;
           if (url == null && res.data!.paymentToken != null) {
             url = 'https://checkout.fedapay.com/pay/${res.data!.paymentToken}';
@@ -134,6 +150,9 @@ class _PayWidgetState extends State<PayWidget> {
           final uri = Uri.parse(url);
           if (await canLaunchUrl(uri)) {
             await launchUrl(uri, mode: LaunchMode.externalApplication);
+            if (_transactionId != null) {
+              _startPolling();
+            }
           } else {
             widget.onPaymentFailed();
           }
@@ -149,6 +168,35 @@ class _PayWidgetState extends State<PayWidget> {
     }
   }
 
+  void _startPolling() {
+    if (_transactionId == null || widget.instance == null) return;
+    
+    setState(() => _isPolling = true);
+    _pollingTimer = Timer.periodic(const Duration(seconds: 3), (timer) async {
+      try {
+        final res = await widget.instance!.transactions.getTransaction(_transactionId!);
+        if (res.isSuccessful && res.data != null) {
+          final status = res.data!.status?.toLowerCase();
+          if (status == 'approved' || status == 'transferred') {
+            timer.cancel();
+            if (mounted) {
+              setState(() => _isPolling = false);
+              widget.onPaymentSuccess();
+            }
+          } else if (status == 'canceled' || status == 'declined') {
+            timer.cancel();
+            if (mounted) {
+              setState(() => _isPolling = false);
+              widget.onPaymentFailed();
+            }
+          }
+        }
+      } catch (e) {
+        debugPrint('Polling error: $e');
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_controller == null) {
@@ -158,19 +206,32 @@ class _PayWidgetState extends State<PayWidget> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              hasFailed ? Icons.error_outline : Icons.computer,
+              hasFailed ? Icons.error_outline : (_isPolling ? Icons.sync : Icons.computer),
               size: 64,
-              color: hasFailed ? Colors.red : Colors.grey,
+              color: hasFailed ? Colors.red : Colors.blue,
             ),
             const SizedBox(height: 16),
             Text(
               hasFailed
                   ? 'La création du paiement a échoué.'
-                  : 'Utilisez le bouton ci-dessous pour payer :',
+                  : (_isPolling 
+                      ? 'Paiement en cours... En attente de validation.' 
+                      : 'Utilisez le bouton ci-dessous pour payer :'),
+              textAlign: TextAlign.center,
             ),
+            if (_isPolling) ...[
+              const SizedBox(height: 24),
+              const CircularProgressIndicator(),
+              const SizedBox(height: 24),
+              const Text(
+                'Ne fermez pas cette fenêtre après avoir payé.\nL\'application se mettra à jour automatiquement.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+            ],
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: _isLoading ? null : _startPayment,
+              onPressed: (_isLoading || _isPolling) ? null : _startPayment,
               child: _isLoading
                   ? const SizedBox(
                       height: 20,
@@ -178,7 +239,7 @@ class _PayWidgetState extends State<PayWidget> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : Text(
-                      hasFailed ? 'Réessayer' : 'Ouvrir dans le navigateur',
+                      hasFailed ? 'Réessayer' : (_isPolling ? 'En attente...' : 'Ouvrir dans le navigateur'),
                     ),
             ),
           ],
