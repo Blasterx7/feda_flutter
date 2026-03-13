@@ -51,7 +51,7 @@ class DioServiceImpl implements IDioService {
     required ApiEnvironment environment,
   }) : _dio = Dio(
           BaseOptions(
-            baseUrl: cloudUrl,
+            baseUrl: cloudUrl.endsWith('/') ? '${cloudUrl}fedapay/' : '$cloudUrl/fedapay/',
             connectTimeout: const Duration(seconds: 20),
             receiveTimeout: const Duration(seconds: 20),
             headers: {

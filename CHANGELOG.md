@@ -1,3 +1,12 @@
+## 1.0.0
+
+* **Major Release**: Backend-first architecture integration with `feda-cloud`.
+* Added `applyCloudConfig()` for secure production initialization (zero API keys in binary).
+* Deprecated `initialize()` in favor of `applyConfig()` (Direct) and `applyCloudConfig()` (Proxy).
+* Improved `FedaPayWidget` to handle cloud-based redirects and status polling.
+* Full typed support for `Transactions`, `Customers`, and `Payouts`.
+* Comprehensive documentation hub integrated with Nuxt Content.
+
 ## 0.2.2
 
 * Added dartdoc comments to all major public API elements (`FedaFlutter`, `ApiEnvironment`, `ApiResponse`, `Transaction`, `Customer`, `Payout`, etc.).
