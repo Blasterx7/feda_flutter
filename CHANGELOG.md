@@ -1,6 +1,6 @@
 ## 1.0.0
 
-* **Major Release**: Backend-first architecture integration with `feda-cloud`.
+* **Major Release**: Backend-first architecture integration with `ash-gate`.
 * Added `applyCloudConfig()` for secure production initialization (zero API keys in binary).
 * Deprecated `initialize()` in favor of `applyConfig()` (Direct) and `applyCloudConfig()` (Proxy).
 * Improved `FedaPayWidget` to handle cloud-based redirects and status polling.
