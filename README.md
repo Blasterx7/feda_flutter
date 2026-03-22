@@ -24,7 +24,7 @@ Then initialize and use the client in your app:
 // Recommended for Production (Cloud Proxy):
 FedaFlutter.applyCloudConfig(
   projectKey: 'pk_...', 
-  cloudUrl: 'https://your-cloud-proxy.com'
+  cloudUrl: 'https://ashgateway.com'
 );
 
 // OR Legacy/Prototyping (Direct API):
@@ -136,7 +136,7 @@ The `feda_flutter` SDK is evolving towards a more secure, backend-first architec
 
 The old `FedaFlutter.initialize()` is deprecated. Please use:
 - **`applyConfig()`**: For direct API key usage (Sandbox or Prototyping).
-- **`applyCloudConfig()`**: **(Recommended)** For production, using a Cloud Proxy (like `ash-gate`) to avoid exposing secret keys in the mobile binary.
+- **`applyCloudConfig()`**: **(Recommended)** For production, using a Cloud Proxy (like `ashgateway`) to avoid exposing secret keys in the mobile binary.
 
 ### Initialization Modes
 
@@ -146,7 +146,7 @@ This mode ensures your secret API keys never leave your server.
 ```dart
 FedaFlutter.applyCloudConfig(
   projectKey: 'your_public_project_key',
-  cloudUrl: 'https://your-ash-gate-instance.com',
+  cloudUrl: 'https://ashgateway.com',
 );
 ```
 

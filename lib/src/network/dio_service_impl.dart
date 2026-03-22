@@ -38,10 +38,10 @@ class DioServiceImpl implements IDioService {
     _addInterceptors(apiKey);
   }
 
-  /// Mode Cloud Proxy — toutes les requêtes passent par ash-bwallet.
+  /// Mode Cloud Proxy — toutes les requêtes passent par ashgateway.
   ///
   /// Le SDK injecte automatiquement :
-  /// - `x-feda-project-key` : identifie le projet (ash-bwallet résout la clé FedaPay)
+  /// - `x-feda-project-key` : identifie le projet (ashgateway résout la clé FedaPay)
   /// - `x-feda-env` : 'sandbox' ou 'live'
   ///
   /// Aucune clé FedaPay n'est exposée côté client.
@@ -159,8 +159,14 @@ class DioServiceImpl implements IDioService {
     String message = "Unexpected error";
 
     if (e is DioException) {
-      message =
-          e.response?.data?["message"] ?? e.message ?? "Network request failed";
+      final data = e.response?.data;
+      if (data is Map) {
+        message = data["message"]?.toString() ??
+            e.message ??
+            "Network request failed";
+      } else {
+        message = e.message ?? "Network request failed";
+      }
     }
 
     return NetworkException(message);
