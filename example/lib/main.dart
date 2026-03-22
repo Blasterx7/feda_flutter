@@ -53,8 +53,8 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     FedaFlutter.applyConfig(
-      apiKey: 'sj.....', // TODO: Use your real key
-      environment: ApiEnvironment.live,
+      apiKey: 'sk_sandbox_znTsLzxoQd3nqLir5P0kg4vQ', // Dummy key for testing
+      environment: ApiEnvironment.sandbox,
     );
   }
 
@@ -265,6 +265,28 @@ class _MyHomePageState extends State<MyHomePage> {
             padding: const EdgeInsets.all(12.0),
             child: Column(
               children: [
+                const Text(
+                  'Quick PayWidget Preview (Linux/Desktop)',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  height: 180,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    border: Border.all(color: Colors.blue.shade200),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: PayWidget(
+                    instance: _fedaFlutter,
+                    amount: 1500,
+                    description: 'Embedded Demo',
+                    onPaymentSuccess: () => _appendLog('Demo success'),
+                    onPaymentFailed: () => _appendLog('Demo failed'),
+                  ),
+                ),
+                const SizedBox(height: 16),
                 Row(
                   children: [
                     Expanded(
