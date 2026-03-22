@@ -1,3 +1,11 @@
+## 1.0.1
+
+* **Fix**: Unified nomenclature from `ash-gate`/`ash-bwallet` to `ashgateway`.
+* **Fix**: Corrected base URL construction with trailing slash.
+* **Security**: Safe error handling for non-JSON API responses.
+* **Docs**: Added dedicated `ashgateway` documentation page and updated official URL to `https://ashgateway.com`.
+* **Example**: Added direct `PayWidget` preview on the main screen.
+
 ## 1.0.0
 
 * **Major Release**: Backend-first architecture integration with `ashgateway`.
